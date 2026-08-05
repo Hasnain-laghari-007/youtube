@@ -1,12 +1,14 @@
 import React from 'react'
-import { Menu, Search, Mic, Plus , Bell } from 'lucide-react'
+import { Menu, Search, Mic, Plus, Bell } from 'lucide-react'
 import youtubeHome from "../../assets/social.png"
 
 const Navbar = () => {
   return (
     <div className='Navbar w-full flex items-center justify-between px-4 py-1  relative top-2'>
       <div className="leftPart flex items-center space-x-6">
-        <Menu />
+        <button className='Menu p-3 rounded-[50%]'>
+          <Menu />
+        </button>
         <div className='w-11 h-11'>
           <img className='w-full h-full' src={youtubeHome} />
         </div>
@@ -26,7 +28,7 @@ const Navbar = () => {
         </button>
 
         <button className='flex items-center py-3 px-5 space-x-2 rounded-[20px]'> {/*create button*/}
-          <Plus size={25} /> 
+          <Plus size={25} />
           <span className='text-[16px]'>Create</span>
         </button>
 
