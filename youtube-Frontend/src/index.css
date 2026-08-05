@@ -1,2 +1,21 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;300;400;500;600;700;800;900&display=swap');
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base{
+    *{
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    body,html,#root{
+        height: 100%;
+        width: 100%;
+    }
+}
+
+@layer components{
+    .Navbar .rightPart button{
+        @apply hover:bg-[#3F3F3F] duration-100 bg-[#303030] cursor-pointer
+    }
+}
