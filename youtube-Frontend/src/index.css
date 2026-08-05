@@ -15,7 +15,7 @@
 }
 
 @layer components{
-    .Navbar .rightPart button,.Navbar .Menu{
+    .Navbar .rightPart button:not(:last-child),.Navbar .Menu{
         @apply hover:bg-[#3F3F3F] duration-100 bg-[#303030] cursor-pointer
     }
 }

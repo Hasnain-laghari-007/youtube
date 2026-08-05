@@ -6,8 +6,8 @@ const Navbar = () => {
   return (
     <div className='Navbar w-full flex items-center justify-between px-4 py-1  relative top-2'>
       <div className="leftPart flex items-center space-x-6">
-        <button className='Menu p-3 rounded-[50%]'>
-          <Menu />
+        <button className='p-2 rounded-[50%] hover:bg-[#3F3F3F] duration-150 cursor-pointer'>
+          <Menu size={23} />
         </button>
         <div className='w-11 h-11'>
           <img className='w-full h-full' src={youtubeHome} />
@@ -27,12 +27,12 @@ const Navbar = () => {
           <Mic size={24} />
         </button>
 
-        <button className='flex items-center py-3 px-5 space-x-2 rounded-[20px]'> {/*create button*/}
+        <button className='flex items-center py-2 px-4 space-x-2 rounded-[20px]'> {/*create button*/}
           <Plus size={25} />
-          <span className='text-[16px]'>Create</span>
+          <span className='text-[16px] font-medium'>Create</span>
         </button>
 
-        <button className='p-3 rounded-[20px]'> {/* notifications button*/}
+        <button className='p-3 rounded-[50%]  hover:bg-[#3F3F3F] duration-150 cursor-pointer'> {/* notifications button*/}
           <Bell size={24} />
         </button>
 
