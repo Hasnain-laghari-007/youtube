@@ -1,17 +1,17 @@
-import React from 'react'
-import { House, Play, TvMinimalPlay, CircleUser } from 'lucide-react'
+import { House, Play, TvMinimalPlay, CircleUser } from 'lucide-react';
 
 const SideBar = () => {
-  let arr = [{ icon: <House />, name: "Home" }, { icon: <Play />, name: "Shorts" }, { icon: <TvMinimalPlay />, name: "Subscriptions" }, { icon: <CircleUser />, name: "You" }]
+  let sideBarItems = [{ icon: <House />, name: "Home", id: 1 }, { icon: <Play />, name: "Shorts", id: 2 }, { icon: <TvMinimalPlay />, name: "Subscriptions", id: 3 }, { icon: <CircleUser />, name: "You", id: 4 }]
+
   return (
-    <ul className='h-full w-5 flex flex-col'>
+    <ul className='sideBar h-[calc(100vh-56px)] inline-block pl-1 pr-5 pt-4'>
       {
-        arr.map((item,idx) =>{
-          <li className='flex flex-col items-center p-10 rounded-[5px] hover:bg-[#0F0F0F] duration-150'>
-            <span>{item.icon}</span>
-            <span>{item.name}</span>
+        sideBarItems.map((item) => (
+          <li key={item.id} className='px-1 py-4  flex flex-col items-center space-y-2 hover:bg-[#272727] hover:cursor-pointer duration-150 rounded-lg'>
+            <span >{item.icon}</span>
+            <span className="text-[10px]">{item.name}</span>
           </li>
-        })
+        ))
       }
     </ul>
   )

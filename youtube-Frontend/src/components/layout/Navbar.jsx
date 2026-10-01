@@ -1,12 +1,15 @@
-import React from 'react'
 import { Menu, Search, Mic, Plus, Bell } from 'lucide-react'
 import youtubeHome from "../../assets/social.png"
+import { useContext } from 'react'
+import { sideBarContext } from '../../context/SideBarContext.jsx'
 
 const Navbar = () => {
+  const { setIsOpen } = useContext(sideBarContext)
   return (
     <div className='Navbar w-full flex items-center justify-between px-4 py-1  relative top-2'>
+
       <div className="leftPart flex items-center space-x-6">
-        <button className='p-2 rounded-[50%] hover:bg-[#3F3F3F] duration-150 cursor-pointer'>
+        <button onClick={() => setIsOpen(prev => !prev)} className='p-2 rounded-[50%] hover:bg-[#3F3F3F] duration-150 cursor-pointer'>
           <Menu size={23} />
         </button>
         <div className='w-11 h-11'>
@@ -41,5 +44,4 @@ const Navbar = () => {
     </div>
   )
 }
-
 export default Navbar
