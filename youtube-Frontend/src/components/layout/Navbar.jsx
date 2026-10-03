@@ -1,5 +1,5 @@
 import { Menu, Search, Mic, Plus, Bell } from 'lucide-react'
-import youtubeHome from "../../assets/social.png"
+import youtubeHome from "../../assets/youtube-logo-icon.jpg"
 import { useContext } from 'react'
 import { sideBarContext } from '../../context/SideBarContext.jsx'
 
@@ -12,16 +12,19 @@ const Navbar = () => {
         <button onClick={() => setIsOpen(prev => !prev)} className='p-2 rounded-[50%] hover:bg-[#3F3F3F] duration-150 cursor-pointer'>
           <Menu size={23} />
         </button>
-        <div className='w-11 h-11'>
-          <img className='w-full h-full' src={youtubeHome} />
+        <div className='w-30 h-11'>
+          <img className='w-full h-full object-fill' src={youtubeHome} />
         </div>
       </div>
 
       <div className="search flex items-center dark:bg-[#121212] dark:text-white text-black bg-white max-w-146 h-10 w-full dark:border dark:border-[#484646d0] rounded-[20px] mx-10">
+
         <input className='relative z-2 placeholder:text[#6C6C6C] text-[17px] focus:outline-blue-500 focus:outline-1 outline-0 flex-1 w-full h-full rounded-tl-[20px] rounded-bl-[20px] pl-4' type="text" id='searchBar' placeholder='Search' />
+
         <button className='searchBtn cursor-pointer bg-[#222222]  h-full flex items-center px-6 rounded-br-[20px] rounded-tr-[20px]'>
           <Search />
         </button>
+
       </div>
 
       <div className="rightPart flex items-center  space-x-10 ">
