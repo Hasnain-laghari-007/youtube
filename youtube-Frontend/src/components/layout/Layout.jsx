@@ -7,11 +7,11 @@ import SideBarContext from '../../context/SideBarContext.jsx'
 const Layout = () => {
     return <SideBarContext>
         <Navbar />
-        <SideBar />
-        <main>
-            <Outlet/>
-        </main>
-        <OverlaySideBar/>
+        <div className='h-[calc(100vh-56px)] flex w-screen'>
+            <SideBar />
+            <Outlet />
+        </div>
+        <OverlaySideBar />
     </SideBarContext>
 
 }
