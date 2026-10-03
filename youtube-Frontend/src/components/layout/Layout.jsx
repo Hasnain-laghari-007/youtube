@@ -1,16 +1,18 @@
-import React from 'react'
 import { Outlet } from 'react-router-dom'
 import Navbar from './Navbar'
 import SideBar from './SideBar'
+import OverlaySideBar from "./OverlaySideBar.jsx"
+import SideBarContext from '../../context/SideBarContext.jsx'
 
 const Layout = () => {
-    return <>
+    return <SideBarContext>
         <Navbar />
         <SideBar />
-        {/* <div className='main'>
+        <main>
             <Outlet/>
-        </div> */}
-    </>
+        </main>
+        <OverlaySideBar/>
+    </SideBarContext>
 
 }
 
