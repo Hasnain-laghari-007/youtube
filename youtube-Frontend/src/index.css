@@ -1,22 +1,72 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@100;200;300;400;500;600;700;800;900&display=swap");
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
-@layer base{
-    *{
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  body,
+  html,
+  #root {
+    height: 100%;
+    width: 100%;
+    background-color: black;
+  }
+  .signupDiv .inputRow,
+  .loginDiv .inputRow {
+    width: 100%;
+    border: 1px solid white;
+    height: 45px;
+    border-radius: 4px;
+    position : relative;
+  }
+  .signupDiv input,
+  .loginDiv input {
+    width: 100%;
+    height: 100%;
+    padding-left: 7px;
+    border: none;
+  }
+  :is(.signupDiv, .loginDiv) input:focus {
+    outline: none;
+  }
+  .required::after {
+    content: " *";
+    color: red;
+  }
+  .inputRow span{
+    position: absolute;
+    bottom: -19px;
+    left: 0px;
+    color : red;
+    font-size: 10px;
+  }
+  .signupDiv {
+    animation: formAnimate 0.5s linear;
+  }
+  @keyframes formAnimate {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
     }
-    body,html,#root{
-        height: 100%;
-        width: 100%;
-        background-color: black;
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
+  }
 }
 
-@layer components{
-    .Navbar .rightPart button:not(:last-child){
-        @apply hover:bg-[#3F3F3F] duration-100 bg-[#303030] cursor-pointer
-    }
+@layer components {
+  .Navbar .rightPart button:not(:last-child) {
+    @apply hover:bg-[#3F3F3F] duration-100 bg-[#303030] cursor-pointer;
+  }
+  .inputRow {
+    @apply focus-within:border-blue-400 duration-150;
+  }
+  .inputRow input::placeholder{
+    @apply text-[13px]
+  }
 }
