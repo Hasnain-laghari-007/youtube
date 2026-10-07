@@ -6,21 +6,20 @@ import { useState } from "react"
 const SignUp = () => {
     const [showPass, setShowPass] = useState(false)
 
-    function submit(data) {
-
+    async function submit(data) {
+        console.log(data.username)
     }
 
     const {
         register,
         handleSubmit,
-        formState: { errors, isSubmitting },
+        formState: { errors, isSubmitting , isSubmitSuccessful },
     } = useForm()
-
 
     return (
         <div className='min-h-screen w-full flex justify-center items-center overflow-y-hidden'> {/* OUTER Main DIV */}
 
-            <div className="signupDiv w-full max-w-100 border p-4 flex flex-col items-center bg-[#111111] border-gray-500 rounded-lg "> {/* Form Div*/}
+            <div className="signupDiv w-full max-w-100 border p-4 flex flex-col items-center bg-[#111111] border-gray-500 rounded-lg shadow-[0_0_25px_rgba(62,166,255,0.15)] hover:shadow-[0_0_35px_rgba(62,166,255,0.3)] transition-shadow duration-300"> {/* Form Div*/}
 
                 <div className="logo w-30"> {/* logo image */}
                     <img className="object-fill" src={logo} alt="Logo" />
@@ -59,7 +58,7 @@ const SignUp = () => {
                                 }
                             })}
                             type={showPass ? "text" : "password"} placeholder="Password" />
-                        <button onClick={() => setShowPass(prev => !prev)} className="absolute top-0 right-0 h-full px-5 border bg-gray-900 hover:bg-gray-800 duration-150 cursor-pointer">
+                        <button type="button" onClick={() => setShowPass(prev => !prev)} className="absolute top-0 right-0 h-full px-5 border bg-gray-900 hover:bg-gray-800 duration-150 cursor-pointer">
                             {
                                 showPass ? "Hide" : "Show"
                             }
@@ -80,7 +79,8 @@ const SignUp = () => {
                         <span className="required text-[13px]">Upload Avatar</span>
                         <input
                             {...register("avatar", {
-                                required: "Avatar Image is required*"
+                                required: "Avatar Image is required*",
+                                validate : files => files[0]?.type.startsWith("image/") || "Only images are allowed"
                             })}
                             className="border rounded-lg flex-1" type="file" />
                         {errors?.avatar && <span className="text-[10px] text-red-500">{errors?.avatar?.message}</span>}
@@ -90,7 +90,8 @@ const SignUp = () => {
                         <span className="required text-[13px]">Upload cover image</span>
                         <input
                             {...register("coverImage", {
-                                required: "Cover Image is required*"
+                                required: "Cover Image is required*",
+                                validate : files => files[0]?.type.startsWith("image/") || "Only images are allowed"
                             })}
                             className="border rounded-lg flex-1" type="file" />
                         {errors?.coverImage && <span className="text-[10px] text-red-500">{errors?.coverImage?.message}</span>}
@@ -103,9 +104,9 @@ const SignUp = () => {
                         </NavLink>
                     </p>
 
-                    <button type="submit" className="bg-blue-700 cursor-pointer mx-auto py-2 px-10 rounded-lg">
+                    <button disabled={isSubmitSuccessful} type="submit" className={`bg-blue-700 hover:bg-blue-500 duration-150 cursor-pointer mx-auto py-2 px-10 rounded-lg`}>
                         {
-                            isSubmitting ? "Submitting" : "Submit"
+                            isSubmitting ? "Submitting" : isSubmitSuccessful ? "Submitted✔" : "Submit"
                         }
                     </button>
                 </form>
