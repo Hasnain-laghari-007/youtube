@@ -2,12 +2,25 @@ import logo from "../assets/youtube-logo-icon.jpg"
 import { NavLink } from "react-router-dom"
 import { useForm } from "react-hook-form"
 import { useState } from "react"
+import axios from "axios"
 
 const SignUp = () => {
     const [showPass, setShowPass] = useState(false)
 
     async function submit(data) {
-        console.log(data.username)
+        const formData = new FormData()
+        formData.append("username",data.username)
+        formData.append("password",data.password)
+        formData.append("email",data.email)
+        formData.append("fullName",data.fullName)
+        formData.append("avatar",data.avatar[0])
+        formData.append("coverImage",data.coverImage[0])
+        try {
+            const res = await axios.post("http://localhost:8000/api/v1/users/register-user",formData)
+            console.log(res)
+        } catch (error) {
+            alert(error.message)
+        }
     }
 
     const {
