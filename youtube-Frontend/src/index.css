@@ -21,7 +21,7 @@
     border: 1px solid white;
     height: 45px;
     border-radius: 4px;
-    position : relative;
+    position: relative;
   }
   .signupDiv input,
   .loginDiv input {
@@ -37,24 +37,27 @@
     content: " *";
     color: red;
   }
-  .inputRow span{
+  .inputRow span {
     position: absolute;
     bottom: -19px;
     left: 0px;
-    color : red;
+    color: red;
     font-size: 10px;
   }
   .signupDiv {
     animation: formAnimate 0.5s linear;
   }
+  .loginDiv {
+    animation: formAnimate 0.5s linear;
+  }
   @keyframes formAnimate {
     from {
-        opacity: 0;
-        transform: translateY(20px);
+      opacity: 0;
+      transform: translateY(20px);
     }
     to {
-        opacity: 1;
-        transform: translateY(0);
+      opacity: 1;
+      transform: translateY(0);
     }
   }
 }
@@ -66,7 +69,7 @@
   .inputRow {
     @apply focus-within:border-blue-400 duration-150;
   }
-  .inputRow input::placeholder{
-    @apply text-[13px]
+  .inputRow input::placeholder {
+    @apply text-[13px];
   }
 }

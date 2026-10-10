@@ -28,7 +28,7 @@ const SignUp = () => {
                 api.post("/users/register-user", formData),
                 {
                     loading: "Registering...",
-                    success: res => `Welcome ${res.data?.data?.username}`,
+                    success: res => "Successfully Registered!",
                     error: (err) => err.response?.data?.message || "Registration failed",
                 }
             );
