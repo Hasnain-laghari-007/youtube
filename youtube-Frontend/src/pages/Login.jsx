@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form"
 import { api } from "../api/axios.js"
 import { useNavigate } from "react-router-dom"
 import toast from "react-hot-toast"
+import { NavLink } from "react-router-dom"
 
 const Login = () => {
   const [showPass, setShowPass] = useState(false)
@@ -66,6 +67,8 @@ const Login = () => {
             </button>
             {errors?.password && <span className="mt-5 text-[10px]">{errors?.password?.message}</span>}
           </div>
+
+          <p className="text-[#aaaaaa]">Don't have an account?{" "}<NavLink className={"cursor-pointer hover:underline text-[#3ea6ff]"} to="/signup">Signup</NavLink></p>
 
           <button disabled={isSubmitting} type="submit" className="mx-auto my-3 py-2 font-medium rounded-md cursor-pointer hover:bg-blue-700 duration-150 px-10 bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50">
               Login
