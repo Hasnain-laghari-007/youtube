@@ -56,7 +56,7 @@ youtube/
     └── src/
         ├── components/layout/  # Navbar, SideBar, OverlaySideBar, Layout
         ├── context/            # SideBar state
-        ├── pages/              # Home
+        ├── pages/              # Home, Login , Signup
         ├── routes/             # Router config
         ├── App.jsx
         └── main.jsx
