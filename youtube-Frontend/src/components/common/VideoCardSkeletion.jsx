@@ -1,18 +1,15 @@
 const VideoCardSkeletion = () => {
     return (
-        <div className="flex flex-col animate-pulse">
-            <img className="bg-[#272727] thumbnailSkeletion aspect-video w-full rounded-xl" src={""} alt="thumbnail" />
+        <div className="skeletion flex flex-col">
+            <div className="bg-[#272727] thumbnailSkeletion aspect-video w-full rounded-xl"></div>
 
-            <div className="desc mt-3 flex">
+            <div className="desc mt-3 flex space-x-2">
 
-                <div className="avatar w-9 h-9 rounded-[50%] bg-[#272727]">
-                    <img className="w-full h-full" src="" alt="avatar" />
-                </div>
+                <div className="avatar w-11 h-10 rounded-[50%] bg-[#272727]"></div>
 
-                <div className="flex flex-col">
-                    <p className="bg-[#272727] h-5 flex-1"></p>
-
-                    <p className="bg-[#272727] h-5 flex-1/2"></p>
+                <div className="flex flex-col gap-y-3 w-full">
+                    <p className="bg-[#272727] rounded-sm h-5 w-full"></p>
+                    <p className="bg-[#272727] rounded-sm h-5 w-[50%]"></p>
                 </div>
             </div>
         </div>
