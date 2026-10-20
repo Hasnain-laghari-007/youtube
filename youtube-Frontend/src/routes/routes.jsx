@@ -3,6 +3,7 @@ import Layout from "../components/layout/Layout.jsx";
 import Home from "../pages/Home.jsx";
 import SignUp from "../pages/SignUp.jsx";
 import Login from "../pages/Login.jsx";
+import VideoUpload from "../pages/VideoUpload.jsx";
 
 const router = createBrowserRouter([
     {
@@ -22,6 +23,10 @@ const router = createBrowserRouter([
     {
         path : "/signup",
         element : <SignUp/>
+    },
+    {
+        path : "/upload-video",
+        element : <VideoUpload/>
     }
 ])
 

@@ -26,7 +26,7 @@ const uploadVideo = asyncHandler(async (req, res) => {
   }
   const session = await mongoose.startSession();
   try {
-    await session.startTransaction();
+    session.startTransaction();
 
     videoFile = await uploadOnCloudinary(videoFile, "Videos");
     thumbnailFile = await uploadOnCloudinary(thumbnailFile, "Thumbnails");

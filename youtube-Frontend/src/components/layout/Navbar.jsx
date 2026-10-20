@@ -2,6 +2,7 @@ import { Menu, Search, Mic, Plus, Bell } from 'lucide-react'
 import youtubeHome from "../../assets/youtube-logo-icon.jpg"
 import { useContext } from 'react'
 import { sideBarContext } from '../../context/SideBarContext.jsx'
+import { NavLink } from "react-router-dom"
 
 const Navbar = () => {
   const { setIsOpen } = useContext(sideBarContext)
@@ -33,10 +34,10 @@ const Navbar = () => {
           <Mic size={24} />
         </button>
 
-        <button className='flex items-center py-2 px-4 space-x-2 rounded-[20px]'> {/*create button*/}
+        <NavLink to="/upload-video" className={`flex items-center bg-[#3F3F3F] hover:bg-[#4b4b4b] py-2 px-4 space-x-2 rounded-[20px] duration-150`}> {/*create button*/}
           <Plus size={25} />
           <span className='text-[16px] font-medium'>Create</span>
-        </button>
+        </NavLink>
 
         <button className='p-3 rounded-[50%]  hover:bg-[#3F3F3F] duration-150 cursor-pointer'> {/* notifications button*/}
           <Bell size={24} />
