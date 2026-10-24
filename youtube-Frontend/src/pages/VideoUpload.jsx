@@ -9,45 +9,50 @@ const VideoUpload = () => {
   const customInputRef = useRef(null)
   const thumnailInput = useRef()
 
-  const {ref : registerRef} = register("video")
+  const { ref: registerRef, ...videoRest } = register("video", {
+    required: "Must upload video!",
+    validate: (video) =>
+      video?.[0]?.type.startsWith("video/") || "Only Video File is allowed",
+  })
 
   async function Submit(data) {
     const formData = new FormData()
+
+  }
+  function onErrors(errors) {
+    const firstError = Object.values(errors)[0]
+    toast.error(firstError.message)
   }
 
-  function clickInput(){
-    if(customInputRef.current){
+  function clickInput() {
+    if (customInputRef.current) {
       customInputRef.current.click()
     }
   }
-  
+
 
   return (
     <div className='w-full min-h-screen'>
 
-      <form className="mx-auto w-[95%] max-w-180 border h-screen rounded-xl p-5 flex flex-col gap-y-5" onSubmit={handleSubmit(Submit)}>
+      <form className="videoForm mx-auto w-[95%] max-w-180 border  rounded-xl p-5 flex flex-col gap-y-5" onSubmit={handleSubmit(Submit, onErrors)}>
 
         {/* Upper Video field Div */}
         <div className="videoField flex items-center justify-center w-full h-30 border border-dashed border-gray-400 rounded-[10px] relative transparent">
 
           {/* File upload input */}
-          <input ref={(element)=>
-            {
+          <input
+            {...videoRest}
+            ref={(element) => {
               registerRef(element);
               customInputRef.current = element
             }
-          }
-            {...register("video", {
-              required: "Must upload video!",
-              validate: (video) => video?.[0]?.type.startsWith("video/") || "Only Video File is allowed"
-            })}
+            }
             className="w-full h-full outline-0 hidden" type="file" id="videofield" />
-          {errors.video && toast.error(errors.video.message)}
 
           {/* Upload Button */}
           <button type="button"
-            onClick={clickInput} className="flex items-center gap-x-2 py-3 px-7 border border-gray-400 rounded-[5px] cursor-pointer">
-            <Plus color="#00a8ff" />
+            onClick={clickInput} className="flex items-center gap-x-2 py-3 px-7 border border-gray-400 hover:bg-gray-900 duration-150  rounded-[5px] cursor-pointer">
+            <Plus className="w-[clamp(0.98rem,3vw,1.25rem)] h-[clamp(0.98rem,3vw,1.25rem)]" color="#00a8ff" />
             <span className="font-medium text-[#00a8ff]">Upload</span>
           </button>
 
@@ -79,19 +84,36 @@ const VideoUpload = () => {
         </div>
 
         {/*Thumbnail Field */}
-        <div className="w-full">
+        <div className="w-full flex flex-wrap gap-y-3 gap-x-3 items-center">
           <label className="font-medium" htmlFor="thumnailInput">Thumnbail{" "} : {" "}
             <input
               {...register("thumbnail", {
                 required: "Thumnail is required!",
                 validate: (img) => img?.[0]?.type.startsWith("image/") || "Thmubnail must be an Image Type"
               })}
-              ref={thumnailInput} className="border rounded-lg" type="file" name="thumnailInput" id="thumnailInput" />
+              ref={thumnailInput} className="border rounded-lg py-2 cursor-pointer max-[375px]:w-full" type="file" name="thumnailInput" id="thumnailInput" />
           </label>
-          {errors.thumbnail && toast.error(errors.thumbnail.message)}
+          <button type="button" className="preview border border-gray-500 rounded-[7px] bg-[#333333] font-medium py-2 px-7 hover:bg-gray-600 duration-150 cursor-pointer">
+            Preview
+          </button>
         </div>
         {/* Thumbnail Field End*/}
 
+        {/*Lower div*/}
+
+        <div className="w-full flex items-center justify-between my-3">
+
+
+          <button className="bg-red-500 hover:bg-red-600 duration-150 py-2 px-8 rounded-lg font-medium cursor-pointer"> {/* Cancel Button */}
+            Cancel
+          </button>
+
+          <button className="bg-green-500 hover:bg-green-600 active:bg-green-700 duration-150 py-2 px-8 rounded-lg font-medium cursor-pointer"> {/* Submit Button */}
+            Submit
+          </button>
+        </div>
+
+        {/*Lower div end*/}
 
       </form>
 
