@@ -15,14 +15,12 @@ const videoSchema = new mongoose.Schema({
     },
     title : {
         type : String,
-        required : [true,"Title is required!"]
     },
     description : {
         type : String
     },
     thumbnail : {
         type : String, // Cloudinary URL
-        required : [true,"Thumbnail is required!"]
     },
     owner : {
         required : [true,"Owner is required!"],

@@ -14,31 +14,91 @@ import { User } from "../models/user.model.js";
 
 const uploadVideo = asyncHandler(async (req, res) => {
   const { title, description = "" } = req.body;
-  let videoFile = req.files?.video?.[0]?.path;
-  let thumbnailFile = req.files?.thumbnail?.[0]?.path;
-
+  const id = req.params?.id;
+  let thumbnailFile = req.file?.path;
+  if (!mongoose.isValidObjectId(id))
+    throw new ApiError("Invalid video id!", 400);
   if (!title) {
     throw new ApiError("Title of the video is required!", 400);
   }
 
-  if (!videoFile || !thumbnailFile) {
-    throw new ApiError("Both thumbnail and video files are required!", 400);
+  if (!thumbnailFile) {
+    throw new ApiError("Thumbnail is  required!", 400);
   }
+  const publishedVideo = await Video.findOne({ _id: id, owner: req.user._id }); // searching draft video
+  if (!publishedVideo) throw new ApiError("Video not found", 404);
+
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+
+    thumbnailFile = await uploadOnCloudinary(thumbnailFile, "Thumbnails");
+
+    const video = await Video.findOneAndUpdate(
+      {
+        _id: id,
+        owner: req.user?._id,
+      },
+      {
+        $set: {
+          title,
+          description,
+          thumbnail: thumbnailFile?.secure_url,
+        },
+      },
+      { new: true },
+    ).session(session);
+
+    if (!video) {
+      throw new ApiError("Video not created in DB", 500);
+    }
+
+    await User.findByIdAndUpdate(req.user?._id, {
+      $inc: {
+        videosCount: 1,
+      },
+    }).session(session);
+
+    await session.commitTransaction();
+
+    return res
+      .status(201)
+      .json(new ApiResponse("Video uploaded successfully", video, 201));
+  } catch (error) {
+    await session.abortTransaction();
+
+    if (publishedVideo?.videoFile) {
+      // published video delete
+      await deleteVideoOnCloudinary(publishedVideo.videoFile);
+      await Video.findByIdAndDelete(publishedVideo._id);
+    }
+
+    if (thumbnailFile?.secure_url)
+      await deleteOnCloudinary(thumbnailFile.secure_url);
+    throw new ApiError(error.message, 500);
+  } finally {
+    await session.endSession();
+  }
+});
+
+const uploadVideoDraft = asyncHandler(async (req, res) => {
+  let videoFile = req.file?.path;
+
+  if (!videoFile) {
+    throw new ApiError("Video is required!", 400);
+  }
+
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
 
     videoFile = await uploadOnCloudinary(videoFile, "Videos");
-    thumbnailFile = await uploadOnCloudinary(thumbnailFile, "Thumbnails");
 
     const video = await Video.create(
       [
         {
           videoFile: videoFile.secure_url,
           duration: videoFile.duration,
-          title,
-          description,
-          thumbnail: thumbnailFile?.secure_url,
           owner: req.user?._id,
         },
       ],
@@ -47,11 +107,7 @@ const uploadVideo = asyncHandler(async (req, res) => {
     if (!video[0]) {
       throw new ApiError("Video not created in DB", 500);
     }
-    await User.findByIdAndUpdate(req.user?._id, {
-      $inc: {
-        videosCount: 1,
-      },
-    }).session(session);
+
     await session.commitTransaction();
     return res
       .status(201)
@@ -61,8 +117,6 @@ const uploadVideo = asyncHandler(async (req, res) => {
 
     if (videoFile?.secure_url)
       await deleteVideoOnCloudinary(videoFile.secure_url);
-    if (thumbnailFile?.secure_url)
-      await deleteOnCloudinary(thumbnailFile.secure_url);
     throw new ApiError(error.message, 500);
   } finally {
     await session.endSession();
@@ -77,7 +131,7 @@ const deleteVideo = asyncHandler(async (req, res) => {
   }
   const session = await mongoose.startSession();
   try {
-    await session.startTransaction();
+    session.startTransaction();
 
     const deletedVideo = await Video.findByIdAndDelete(id).session(session);
     if (!deletedVideo) {
@@ -182,12 +236,19 @@ const userTopVideos = asyncHandler(async (req, res) => {
       $limit: 10,
     },
   ]);
-  
-  if(topVideos?.length)await safeRedisSet(`topVideos:${userId}`, topVideos);
+
+  if (topVideos?.length) await safeRedisSet(`topVideos:${userId}`, topVideos);
 
   return res
     .status(200)
     .json(new ApiResponse("Top videos fetched successfully", topVideos, 200));
 });
 
-export { uploadVideo, deleteVideo, getVideo, getVideos, userTopVideos };
+export {
+  uploadVideo,
+  deleteVideo,
+  getVideo,
+  getVideos,
+  userTopVideos,
+  uploadVideoDraft
+};

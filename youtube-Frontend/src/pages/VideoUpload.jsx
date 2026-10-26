@@ -29,13 +29,14 @@ const VideoUpload = () => {
 
   async function handleChange(e) {
     const file = e.target.files[0]
+    videoRest.onChange(e)
     if (!file) return
     if (!file.type.startsWith("video/")) { toast.error("File must be a video!"); return }
     setProgress(0)
     setUploadStatus("uploading")
 
     const formData = new FormData()
-    formData.append("video", file)
+    formData.append("Video", file)
 
     try {
       const response = await api.post("/upload-video", formData,
@@ -64,7 +65,7 @@ const VideoUpload = () => {
   return (
     <div className='w-full'>
 
-      <form className="videoForm mx-auto w-[95%] max-w-160 border  rounded-xl p-5 flex flex-col gap-y-4" onSubmit={handleSubmit(Submit, onErrors)}>
+      <form  className="videoForm mx-auto w-[95%] max-w-160 border  rounded-xl p-5 flex flex-col gap-y-4" onSubmit={handleSubmit(Submit, onErrors)}>
 
         {/* Upper Video field Div */}
         <div className="videoField flex items-center justify-center w-full h-30 border border-dashed border-gray-400 rounded-[10px] relative transparent">
