@@ -1,6 +1,6 @@
 import { useForm } from "react-hook-form"
 import { Plus } from "lucide-react"
-import {api} from "../api/axios.js"
+import { api } from "../api/axios.js"
 import { useRef, useState } from "react"
 import toast from "react-hot-toast"
 
@@ -8,9 +8,9 @@ const VideoUpload = () => {
   const { register, handleSubmit, formState: { errors }, } = useForm()
   const customInputRef = useRef(null)
   const thumnailInput = useRef()
-  const [progress,setProgress] = useState(0)
-  const [uploadStatus,setUploadStatus] = useState("idle")
-  const [uploadedVideo,setUploadedVideo] = useState(null)
+  const [progress, setProgress] = useState(0)
+  const [uploadStatus, setUploadStatus] = useState("idle")
+  const [uploadedVideo, setUploadedVideo] = useState(null)
 
   const { ref: registerRef, ...videoRest } = register("video", {
     required: "Must upload video!",
@@ -27,17 +27,31 @@ const VideoUpload = () => {
     toast.error(firstError.message)
   }
 
-  async function handleChange(e){
+  async function handleChange(e) {
     const file = e.target.files[0]
-    if(!file) return
-    if(!file.type.startsWith("video/")) {toast.error("File must be a video!"); return}
+    if (!file) return
+    if (!file.type.startsWith("video/")) { toast.error("File must be a video!"); return }
     setProgress(0)
     setUploadStatus("uploading")
 
     const formData = new FormData()
-    formData.append("video",file)
-    await api.post("upload-video")
+    formData.append("video", file)
 
+    try {
+      const response = await api.post("/upload-video", formData,
+        {
+          onUploadProgress: (event) => {
+            if (!event.total) return
+            setProgress(Math.round((event.loaded * 100) / event.total))
+          }
+        })
+        setUploadedVideo(response.data.data)
+        setUploadStatus("success")
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.message)
+      setProgress(0)
+      setUploadStatus("idle")
+    }
   }
 
   function clickInput() {
@@ -75,7 +89,7 @@ const VideoUpload = () => {
 
           {/* Progress Div */}
           {uploadStatus !== "idle" && <div className="progressDiv absolute -bottom-10 left-0">
-            <progress className="" value={progress} max={100}></progress>
+            <progress className="" value={progress} max={100}>{progress}%</progress>
           </div>}
 
         </div> {/*Video Field Div end*/}
