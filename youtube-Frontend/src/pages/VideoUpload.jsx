@@ -1,13 +1,16 @@
 import { useForm } from "react-hook-form"
 import { Plus } from "lucide-react"
-import axios from "axios"
-import { useRef } from "react"
+import {api} from "../api/axios.js"
+import { useRef, useState } from "react"
 import toast from "react-hot-toast"
 
 const VideoUpload = () => {
   const { register, handleSubmit, formState: { errors }, } = useForm()
   const customInputRef = useRef(null)
   const thumnailInput = useRef()
+  const [progress,setProgress] = useState(0)
+  const [uploadStatus,setUploadStatus] = useState("idle")
+  const [uploadedVideo,setUploadedVideo] = useState(null)
 
   const { ref: registerRef, ...videoRest } = register("video", {
     required: "Must upload video!",
@@ -24,6 +27,19 @@ const VideoUpload = () => {
     toast.error(firstError.message)
   }
 
+  async function handleChange(e){
+    const file = e.target.files[0]
+    if(!file) return
+    if(!file.type.startsWith("video/")) {toast.error("File must be a video!"); return}
+    setProgress(0)
+    setUploadStatus("uploading")
+
+    const formData = new FormData()
+    formData.append("video",file)
+    await api.post("upload-video")
+
+  }
+
   function clickInput() {
     if (customInputRef.current) {
       customInputRef.current.click()
@@ -32,9 +48,9 @@ const VideoUpload = () => {
 
 
   return (
-    <div className='w-full min-h-screen'>
+    <div className='w-full'>
 
-      <form className="videoForm mx-auto w-[95%] max-w-180 border  rounded-xl p-5 flex flex-col gap-y-5" onSubmit={handleSubmit(Submit, onErrors)}>
+      <form className="videoForm mx-auto w-[95%] max-w-160 border  rounded-xl p-5 flex flex-col gap-y-4" onSubmit={handleSubmit(Submit, onErrors)}>
 
         {/* Upper Video field Div */}
         <div className="videoField flex items-center justify-center w-full h-30 border border-dashed border-gray-400 rounded-[10px] relative transparent">
@@ -47,6 +63,7 @@ const VideoUpload = () => {
               customInputRef.current = element
             }
             }
+            onChange={handleChange}
             className="w-full h-full outline-0 hidden" type="file" id="videofield" />
 
           {/* Upload Button */}
@@ -57,10 +74,9 @@ const VideoUpload = () => {
           </button>
 
           {/* Progress Div */}
-          <div className="progressDiv absolute -bottom-10 left-0">
-            <p className={`progressBar rounded-[5px] w-full h-2.25 bg-blue-500`}></p>
-            <span className="">10%</span>
-          </div>
+          {uploadStatus !== "idle" && <div className="progressDiv absolute -bottom-10 left-0">
+            <progress className="" value={progress} max={100}></progress>
+          </div>}
 
         </div> {/*Video Field Div end*/}
 

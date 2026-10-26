@@ -16,12 +16,11 @@ const Login = () => {
 
   async function login(data) {
     const val = data.username_Email
-    const isEmail = data.username_Email.includes("@")
     const password = data.password
     try {
       await toast.promise(
         api.post("/users/login", {
-          [isEmail ? "email" : "username"] : val,
+          UsernameOrEmail : val,
           password : password
          }),
         {
