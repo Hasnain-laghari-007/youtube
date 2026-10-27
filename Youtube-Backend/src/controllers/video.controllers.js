@@ -115,8 +115,10 @@ const uploadVideoDraft = asyncHandler(async (req, res) => {
   } catch (error) {
     await session.abortTransaction();
 
-    if (videoFile?.secure_url)
+    if (videoFile?.secure_url){
       await deleteVideoOnCloudinary(videoFile.secure_url);
+    }
+      
     throw new ApiError(error.message, 500);
   } finally {
     await session.endSession();
