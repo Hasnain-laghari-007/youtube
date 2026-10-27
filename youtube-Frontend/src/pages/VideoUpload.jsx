@@ -2,12 +2,16 @@ import { useForm } from "react-hook-form"
 import { Plus } from "lucide-react"
 import { api } from "../api/axios.js"
 import { useRef, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import toast from "react-hot-toast"
+import axios from "axios"
 
 const VideoUpload = () => {
-  const { register, handleSubmit, formState: { errors }, } = useForm()
+  const navigate = useNavigate()
+  const { register, handleSubmit, formState: { errors, isSubmitting }, } = useForm()
   const customInputRef = useRef(null)
   const thumnailInput = useRef()
+  const controllerRef = useRef(null)
   const [progress, setProgress] = useState(0)
   const [uploadStatus, setUploadStatus] = useState("idle")
   const [uploadedVideo, setUploadedVideo] = useState(null)
@@ -20,7 +24,16 @@ const VideoUpload = () => {
 
   async function Submit(data) {
     const formData = new FormData()
-
+    formData.append("title", data.title)
+    formData.append("description", data.description)
+    formData.append("Thumbnail", data.thumbnail[0])
+    try {
+      const res = await api.patch(`/videos/video/${uploadedVideo?._id}`, formData)
+      toast.success(res.data.message)
+      navigate("/")
+    } catch (error) {
+      toast.error(error.response?.data?.message || error.message)
+    }
   }
   function onErrors(errors) {
     const firstError = Object.values(errors)[0]
@@ -39,16 +52,23 @@ const VideoUpload = () => {
     formData.append("Video", file)
 
     try {
-      const response = await api.post("/upload-video", formData,
+      controllerRef.current = new AbortController()
+      const response = await api.post("/videos/upload-video", formData,
         {
           onUploadProgress: (event) => {
             if (!event.total) return
             setProgress(Math.round((event.loaded * 100) / event.total))
-          }
+          },
+          signal: controllerRef.current?.signal
         })
-        setUploadedVideo(response.data.data)
-        setUploadStatus("success")
+      setUploadedVideo(response.data.data)
+      setUploadStatus("success")
     } catch (error) {
+      if (axios.isCancel(error)) {
+        setProgress(0)
+        setUploadStatus("idle")
+        return
+      }
       toast.error(error.response?.data?.message || error.message)
       setProgress(0)
       setUploadStatus("idle")
@@ -65,7 +85,7 @@ const VideoUpload = () => {
   return (
     <div className='w-full'>
 
-      <form  className="videoForm mx-auto w-[95%] max-w-160 border  rounded-xl p-5 flex flex-col gap-y-4" onSubmit={handleSubmit(Submit, onErrors)}>
+      <form className="videoForm mx-auto w-[95%] max-w-160 border  rounded-xl p-5 flex flex-col gap-y-4" onSubmit={handleSubmit(Submit, onErrors)}>
 
         {/* Upper Video field Div */}
         <div className="videoField flex items-center justify-center w-full h-30 border border-dashed border-gray-400 rounded-[10px] relative transparent">
@@ -89,9 +109,21 @@ const VideoUpload = () => {
           </button>
 
           {/* Progress Div */}
-          {uploadStatus !== "idle" && <div className="progressDiv absolute -bottom-10 left-0">
-            <progress className="" value={progress} max={100}>{progress}%</progress>
-          </div>}
+          {uploadStatus !== "idle" && (
+            <div className="progressDiv absolute -bottom-12 left-0 w-full">
+
+              {/* Progress Bar */}
+              <p className="text-[10px] text-blue-400" >
+                {progress === 100 ? "Uploaded!" : ""}
+              </p>
+              <progress
+                value={progress}
+                max={100}
+                className="w-full h-2.5 rounded-full overflow-hidden appearance-none [&::-webkit-progress-bar]:bg-gray-100 [&::-webkit-progress-value]:bg-gray-500 [&::-moz-progress-bar]:bg-gray-500"
+              />
+
+            </div>
+          )}
 
         </div> {/*Video Field Div end*/}
 
@@ -110,9 +142,13 @@ const VideoUpload = () => {
             type="text" name="title" id="title" placeholder="Video Title" />
         </div>
 
+        {/* Description Div */}
         <div className="descriptionDiv w-full h-38 p-2 outline focus-within:outline-blue-500 rounded-xl duration-150">
-          <textarea className="w-full h-full resize-none focus:outline-0" name="description" id="description" placeholder="Description..."></textarea>
+          <textarea
+            {...register("description")}
+            className="w-full h-full resize-none focus:outline-0" name="description" id="description" placeholder="Description..."></textarea>
         </div>
+
 
         {/*Thumbnail Field */}
         <div className="w-full flex flex-wrap gap-y-3 gap-x-3 items-center">
@@ -122,9 +158,9 @@ const VideoUpload = () => {
                 required: "Thumnail is required!",
                 validate: (img) => img?.[0]?.type.startsWith("image/") || "Thmubnail must be an Image Type"
               })}
-              ref={thumnailInput} className="border rounded-lg py-2 cursor-pointer max-[375px]:w-full" type="file" name="thumnailInput" id="thumnailInput" />
+              className="border rounded-lg py-2 cursor-pointer max-[375px]:w-full" type="file" name="thumnailInput" id="thumnailInput" />
           </label>
-          <button type="button" className="preview border border-gray-500 rounded-[7px] bg-[#333333] font-medium py-2 px-7 hover:bg-gray-600 duration-150 cursor-pointer">
+          <button type="button" className="preview border border-gray-500 rounded-[7px] bg-[#333333] font-medium py-2 px-7 hover:bg-gray-600 duration-150 cursor-pointer disabled:bg-[#1e1e1e]">
             Preview
           </button>
         </div>
@@ -135,12 +171,16 @@ const VideoUpload = () => {
         <div className="w-full flex items-center justify-between my-3">
 
 
-          <button className="bg-red-500 hover:bg-red-600 duration-150 py-2 px-8 rounded-lg font-medium cursor-pointer"> {/* Cancel Button */}
+          <button onClick={() => controllerRef.current?.abort()} type="button" className="bg-red-500 hover:bg-red-600 duration-150 py-2 px-8 rounded-lg font-medium cursor-pointer"> {/* Cancel Button */}
             Cancel
           </button>
 
-          <button className="bg-green-500 hover:bg-green-600 active:bg-green-700 duration-150 py-2 px-8 rounded-lg font-medium cursor-pointer"> {/* Submit Button */}
-            Submit
+          <button
+            type="submit"
+            disabled={uploadStatus !== 'success' || isSubmitting}
+            className="bg-green-500 hover:bg-green-600 active:bg-green-700 duration-150 py-2 px-8 rounded-lg font-medium cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSubmitting ? "Submitting..." : "Submit"}
           </button>
         </div>
 
