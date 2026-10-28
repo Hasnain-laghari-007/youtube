@@ -5,12 +5,16 @@ import { useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import toast from "react-hot-toast"
 import axios from "axios"
+import ThumbnailPreview from "../components/common/ThumbnailPreview.jsx"
+import { useEffect } from "react"
 
 const VideoUpload = () => {
   const navigate = useNavigate()
+  const [preview, setPreview] = useState(false)
   const { register, handleSubmit, formState: { errors, isSubmitting }, } = useForm()
   const customInputRef = useRef(null)
-  const thumnailInput = useRef()
+  const thumnailInput = useRef(null)
+  const [thumbnail,setThumbnail] = useState(null)
   const controllerRef = useRef(null)
   const [progress, setProgress] = useState(0)
   const [uploadStatus, setUploadStatus] = useState("idle")
@@ -80,6 +84,11 @@ const VideoUpload = () => {
       customInputRef.current.click()
     }
   }
+  
+  function handleThumbnailChnage(e){
+    const file = e.target.files[0]
+    if(file) setThumbnail(URL.createObjectURL(file))
+  }
 
 
   return (
@@ -102,24 +111,30 @@ const VideoUpload = () => {
             className="w-full h-full outline-0 hidden" type="file" id="videofield" />
 
           {/* Upload Button */}
-          <button type="button"
-            onClick={clickInput} className="flex items-center gap-x-2 py-3 px-7 border border-gray-400 hover:bg-gray-900 duration-150  rounded-[5px] cursor-pointer">
-            <Plus className="w-[clamp(0.98rem,3vw,1.25rem)] h-[clamp(0.98rem,3vw,1.25rem)]" color="#00a8ff" />
-            <span className="font-medium text-[#00a8ff]">Upload</span>
-          </button>
+          {
+            uploadStatus === "uploading" ?
+              <div className="w-10 h-10  border-2 border-blue-500 border-b-transparent border-t-transparent rounded-[50%] animate-spin"></div>
+              :
+              <button type="button"
+                onClick={clickInput} className="flex items-center gap-x-2 py-3 px-7 border border-gray-400 hover:bg-gray-900 duration-150  rounded-[5px] cursor-pointer">
+                <Plus className="w-[clamp(0.98rem,3vw,1.25rem)] h-[clamp(0.98rem,3vw,1.25rem)]" color="#00a8ff" />
+                <span className="font-medium text-[#00a8ff]">Upload</span>
+              </button>
+          }
+
 
           {/* Progress Div */}
           {uploadStatus !== "idle" && (
-            <div className="progressDiv absolute -bottom-12 left-0 w-full">
+            <div className="progressDiv flex flex-col absolute -bottom-9 left-0 w-full">
 
               {/* Progress Bar */}
-              <p className="text-[10px] text-blue-400" >
-                {progress === 100 ? "Uploaded!" : ""}
+              <p className="text-[14px] font-medium text-blue-400" >
+                {uploadStatus === 'success' ? "Uploaded!" : `${progress}%`}
               </p>
               <progress
                 value={progress}
                 max={100}
-                className="w-full h-2.5 rounded-full overflow-hidden appearance-none [&::-webkit-progress-bar]:bg-gray-100 [&::-webkit-progress-value]:bg-gray-500 [&::-moz-progress-bar]:bg-gray-500"
+                className="w-full h-1.5 rounded-full overflow-hidden appearance-none [&::-webkit-progress-bar]:bg-gray-100 [&::-webkit-progress-value]:bg-gray-500 [&::-moz-progress-bar]:bg-gray-500"
               />
 
             </div>
@@ -158,18 +173,22 @@ const VideoUpload = () => {
                 required: "Thumnail is required!",
                 validate: (img) => img?.[0]?.type.startsWith("image/") || "Thmubnail must be an Image Type"
               })}
-              className="border rounded-lg py-2 cursor-pointer max-[375px]:w-full" type="file" name="thumnailInput" id="thumnailInput" />
+              onChange={()=>handleThumbnailChnage}
+              className="border rounded-lg py-2 cursor-pointer max-[375px]:w-full" type="file" />
           </label>
-          <button type="button" className="preview border border-gray-500 rounded-[7px] bg-[#333333] font-medium py-2 px-7 hover:bg-gray-600 duration-150 cursor-pointer disabled:bg-[#1e1e1e]">
+          <button onClick={() => setPreview(true)} type="button" className="preview border border-gray-500 rounded-[7px] bg-[#333333] font-medium py-2 px-7 hover:bg-gray-600 duration-150 cursor-pointer disabled:bg-[#1e1e1e]">
             Preview
           </button>
         </div>
+
+        
+          <ThumbnailPreview imgSrc={thumbnail} preview={preview} setPreview={setPreview} />
+        
         {/* Thumbnail Field End*/}
 
         {/*Lower div*/}
 
         <div className="w-full flex items-center justify-between my-3">
-
 
           <button onClick={() => controllerRef.current?.abort()} type="button" className="bg-red-500 hover:bg-red-600 duration-150 py-2 px-8 rounded-lg font-medium cursor-pointer"> {/* Cancel Button */}
             Cancel
