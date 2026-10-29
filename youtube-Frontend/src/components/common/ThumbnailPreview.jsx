@@ -1,6 +1,7 @@
 import React from 'react'
 
 const ThumbnailPreview = ({ imgSrc, preview, setPreview }) => {
+  console.log(imgSrc)
   return (
     <div
       className={`fixed top-0 left-0 w-screen min-h-screen flex items-center justify-center bg-black/85 transition-opacity ${
@@ -23,4 +24,4 @@ const ThumbnailPreview = ({ imgSrc, preview, setPreview }) => {
   )
 }
 
-export default ThumbnailPreview
+export default React.memo(ThumbnailPreview)

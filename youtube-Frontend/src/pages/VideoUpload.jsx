@@ -13,8 +13,8 @@ const VideoUpload = () => {
   const [preview, setPreview] = useState(false)
   const { register, handleSubmit, formState: { errors, isSubmitting }, } = useForm()
   const customInputRef = useRef(null)
-  const thumnailInput = useRef(null)
-  const [thumbnail,setThumbnail] = useState(null)
+  const thumbnailInput = useRef(null)
+  const [thumbnail, setThumbnail] = useState(null)
   const controllerRef = useRef(null)
   const [progress, setProgress] = useState(0)
   const [uploadStatus, setUploadStatus] = useState("idle")
@@ -25,6 +25,20 @@ const VideoUpload = () => {
     validate: (video) =>
       video?.[0]?.type.startsWith("video/") || "Only Video File is allowed",
   })
+
+  const { onChange: thumbOnChange, ...thumbRest } = register("thumbnail", {
+    required: "Thumbnail is required!",
+    validate: {
+      isImage: (files) =>
+        files?.[0]?.type.startsWith("image/") || "Thumbnail must be an image",
+      allowedType: (files) =>
+        ["image/jpeg", "image/png", "image/webp"].includes(files?.[0]?.type) ||
+        "Only JPG, PNG or WEBP is allowed",
+      maxSize: (files) =>
+        files?.[0]?.size <= 5 * 1024 * 1024 || "Thumbnail must be under 5MB",
+    },
+  })
+
 
   async function Submit(data) {
     const formData = new FormData()
@@ -84,11 +98,12 @@ const VideoUpload = () => {
       customInputRef.current.click()
     }
   }
-  
-  function handleThumbnailChnage(e){
-    const file = e.target.files[0]
-    if(file) setThumbnail(URL.createObjectURL(file))
-  }
+
+  function handleThumbnailChange(e) {
+  const file = e.target.files[0]
+  if (thumbnail) URL.revokeObjectURL(thumbnail)
+  setThumbnail(file && file.type.startsWith("image/") ? URL.createObjectURL(file) : null)
+}
 
 
   return (
@@ -167,23 +182,27 @@ const VideoUpload = () => {
 
         {/*Thumbnail Field */}
         <div className="w-full flex flex-wrap gap-y-3 gap-x-3 items-center">
-          <label className="font-medium" htmlFor="thumnailInput">Thumnbail{" "} : {" "}
+          <label className="font-medium" htmlFor="thumbnailInput">Thumnbail{" "} : {" "}
             <input
-              {...register("thumbnail", {
-                required: "Thumnail is required!",
-                validate: (img) => img?.[0]?.type.startsWith("image/") || "Thmubnail must be an Image Type"
-              })}
-              onChange={()=>handleThumbnailChnage}
-              className="border rounded-lg py-2 cursor-pointer max-[375px]:w-full" type="file" />
+              {...thumbRest}
+              id="thumbnailInput"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={(e) => {
+                thumbOnChange(e)          // react-hook-form ko value mile
+                handleThumbnailChange(e)  // preview ke liye
+              }}
+              className="border rounded-lg py-2 cursor-pointer max-[375px]:w-full"
+              type="file"
+            />
           </label>
-          <button onClick={() => setPreview(true)} type="button" className="preview border border-gray-500 rounded-[7px] bg-[#333333] font-medium py-2 px-7 hover:bg-gray-600 duration-150 cursor-pointer disabled:bg-[#1e1e1e]">
+          <button disabled={!thumbnail} onClick={() => setPreview(true)} type="button" className="preview border border-gray-500 rounded-[7px] bg-[#333333] font-medium py-2 px-7 hover:bg-gray-600 duration-150 cursor-pointer disabled:bg-[#1e1e1e] disabled:cursor-not-allowed">
             Preview
           </button>
         </div>
 
-        
-          <ThumbnailPreview imgSrc={thumbnail} preview={preview} setPreview={setPreview} />
-        
+
+        <ThumbnailPreview imgSrc={thumbnail} preview={preview} setPreview={setPreview} />
+
         {/* Thumbnail Field End*/}
 
         {/*Lower div*/}
