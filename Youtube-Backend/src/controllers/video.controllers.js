@@ -148,7 +148,7 @@ const deleteVideo = asyncHandler(async (req, res) => {
     await session.commitTransaction();
 
     await deleteVideoOnCloudinary(deletedVideo.videoFile);
-    await deleteOnCloudinary(deletedVideo.thumbnail);
+    if(deleteVideo?.thumbnail) await deleteOnCloudinary(deletedVideo.thumbnail);
     return res
       .status(200)
       .json(new ApiResponse("Video delete successfully", {}, 204));

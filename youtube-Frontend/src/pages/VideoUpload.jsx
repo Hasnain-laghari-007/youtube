@@ -1,16 +1,18 @@
 import { useForm } from "react-hook-form"
-import { Plus } from "lucide-react"
+import { Plus, Trash, TvMinimal } from "lucide-react"
 import { api } from "../api/axios.js"
-import { useRef, useState } from "react"
+import React, { useRef, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import toast from "react-hot-toast"
 import axios from "axios"
 import ThumbnailPreview from "../components/common/ThumbnailPreview.jsx"
-import { useEffect } from "react"
+import VideoPreview from "../components/common/VideoPreview.jsx"
 
 const VideoUpload = () => {
   const navigate = useNavigate()
   const [preview, setPreview] = useState(false)
+  const [videoPreview, setVideoPreview] = useState(false)
+  const [video, setVideo] = useState(null)
   const { register, handleSubmit, formState: { errors, isSubmitting }, } = useForm()
   const customInputRef = useRef(null)
   const thumbnailInput = useRef(null)
@@ -20,7 +22,7 @@ const VideoUpload = () => {
   const [uploadStatus, setUploadStatus] = useState("idle")
   const [uploadedVideo, setUploadedVideo] = useState(null)
 
-  const { ref: registerRef, ...videoRest } = register("video", {
+  const { ref: registerRef, onChange: videoOnChange, ...videoRest } = register("video", {
     required: "Must upload video!",
     validate: (video) =>
       video?.[0]?.type.startsWith("video/") || "Only Video File is allowed",
@@ -60,7 +62,6 @@ const VideoUpload = () => {
 
   async function handleChange(e) {
     const file = e.target.files[0]
-    videoRest.onChange(e)
     if (!file) return
     if (!file.type.startsWith("video/")) { toast.error("File must be a video!"); return }
     setProgress(0)
@@ -98,12 +99,27 @@ const VideoUpload = () => {
       customInputRef.current.click()
     }
   }
-
   function handleThumbnailChange(e) {
-  const file = e.target.files[0]
-  if (thumbnail) URL.revokeObjectURL(thumbnail)
-  setThumbnail(file && file.type.startsWith("image/") ? URL.createObjectURL(file) : null)
-}
+    const file = e.target.files[0]
+    if (thumbnail) URL.revokeObjectURL(thumbnail)
+    setThumbnail(file && file.type.startsWith("image/") ? URL.createObjectURL(file) : null)
+  }
+  function handleVideoChange(e) {
+    const video = e.target.files[0]
+    if (video) URL.revokeObjectURL(video)
+    setVideo(video && video.type.startsWith("video/") ? URL.createObjectURL(video) : null)
+  }
+  async function deleteVideo(e) {
+    if(video) URL.revokeObjectURL(video) 
+    setVideoPreview(false)
+    customInputRef.current = null
+    setUploadStatus("idle")
+    setProgress(0)
+    if(uploadedVideo?._id){
+      await api.delete(`/videos/delete/${uploadedVideo?._id}`)
+    }
+    setUploadedVideo(null)
+  }
 
 
   return (
@@ -122,7 +138,11 @@ const VideoUpload = () => {
               customInputRef.current = element
             }
             }
-            onChange={handleChange}
+            onChange={(e) => {
+              videoOnChange(e)
+              handleChange(e)
+              handleVideoChange(e)
+            }}
             className="w-full h-full outline-0 hidden" type="file" id="videofield" />
 
           {/* Upload Button */}
@@ -154,7 +174,13 @@ const VideoUpload = () => {
 
             </div>
           )}
-
+          {
+            uploadedVideo && <div className="absolute -bottom-8 right-0 flex gap-x-5">
+              <button className="cursor-pointer hover:scale-110" type="button" onClick={() => setVideoPreview(true)}><TvMinimal /></button>
+              <button className="cursor-pointer hover:scale-110" type="button" onClick={deleteVideo}><Trash color="red" /></button>
+            </div>
+          }
+          <VideoPreview videoSrc={video} videoPreview={videoPreview} setVideoPreview={setVideoPreview} />
         </div> {/*Video Field Div end*/}
 
 
