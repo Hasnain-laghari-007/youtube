@@ -1,20 +1,42 @@
 import { House, Play, TvMinimalPlay, CircleUser } from 'lucide-react';
+import { NavLink } from 'react-router-dom';
+
+const sideBarItems = [
+  { id: 1, name: "Home", icon: <House />, path: "/" },
+  { id: 2, name: "Shorts", icon: <Play />, path: null },
+  { id: 3, name: "Subscriptions", icon: <TvMinimalPlay />, path: null },
+  { id: 4, name: "You", icon: <CircleUser />, path: "/profile" },
+];
+
+const itemClass =
+  "px-1 py-4 flex flex-col items-center space-y-2 rounded-lg duration-150 hover:bg-[#272727] cursor-pointer";
 
 const SideBar = () => {
-  let sideBarItems = [{ icon: <House />, name: "Home", id: 1 }, { icon: <Play />, name: "Shorts", id: 2 }, { icon: <TvMinimalPlay />, name: "Subscriptions", id: 3 }, { icon: <CircleUser />, name: "You", id: 4 }]
-
   return (
-    <ul className='sideBar h-full inline-block pl-1 pr-5 pt-4'>
-      {
-        sideBarItems.map((item) => (
-          <li key={item.id} className='px-1 py-4  flex flex-col items-center space-y-2 hover:bg-[#272727] hover:cursor-pointer duration-150 rounded-lg'>
-            <span >{item.icon}</span>
-            <span className="text-[10px]">{item.name}</span>
-          </li>
-        ))
-      }
+    <ul className="sideBar h-full inline-block pl-1 pr-5 pt-4">
+      {sideBarItems.map((item) => (
+        <li key={item.id}>
+          {item.path ? (
+            <NavLink
+              to={item.path}
+              end
+              className={({ isActive }) =>
+                `${itemClass} ${isActive ? "bg-[#272727]" : ""}`
+              }
+            >
+              <span>{item.icon}</span>
+              <span className="text-[10px]">{item.name}</span>
+            </NavLink>
+          ) : (
+            <div className={itemClass}>
+              <span>{item.icon}</span>
+              <span className="text-[10px]">{item.name}</span>
+            </div>
+          )}
+        </li>
+      ))}
     </ul>
-  )
-}
+  );
+};
 
-export default SideBar
+export default SideBar;

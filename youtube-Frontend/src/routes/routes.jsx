@@ -4,6 +4,7 @@ import Home from "../pages/Home.jsx";
 import SignUp from "../pages/SignUp.jsx";
 import Login from "../pages/Login.jsx";
 import VideoUpload from "../pages/VideoUpload.jsx";
+import Profile from "../pages/Profile.jsx"
 
 const router = createBrowserRouter([
     {
@@ -27,6 +28,10 @@ const router = createBrowserRouter([
     {
         path : "/upload-video",
         element : <VideoUpload/>
+    },
+    {
+        path : "/profile",
+        element : <Profile/>
     }
 ])
 
