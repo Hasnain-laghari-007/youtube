@@ -11,7 +11,7 @@ const Profile = () => {
     async function fetchCurrentUser() {
       try {
         const response = await api.get("/users/current-user")
-        setChannel(response.data)
+        setChannel(response.data.data)
       } catch {
         toast.error("Unable to get profile! Try again")
         navigate("/")
@@ -33,15 +33,15 @@ const Profile = () => {
       </div>
 
       {/* Profile info */}
-      <div className="border flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 mt-4">
+      <div className=" flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 mt-4">
         {/* Profile image */}
         <img
           src={channel?.avatar}
           alt="avatar"
-          className="w-20 border h-20 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-full object-cover shrink-0"
+          className="w-20 h-20 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-full object-cover shrink-0"
         />
 
-        <div className="text-center sm:text-left border">
+        <div className="text-center sm:text-left ">
           <h1 className="text-2xl md:text-4xl font-bold">{channel?.fullName}</h1>
           <p className="text-sm text-gray-500 mt-1">
             @{channel?.username} • {channel?.subscribers} subscribers
