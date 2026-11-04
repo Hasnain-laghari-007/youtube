@@ -245,6 +245,46 @@ const userTopVideos = asyncHandler(async (req, res) => {
     .status(200)
     .json(new ApiResponse("Top videos fetched successfully", topVideos, 200));
 });
+const getCurrentUserVideos = asyncHandler(async(req,res)=>{
+  const userId = req.user?._id
+
+  if(!mongoose.isValidObjectId(userId)){
+    throw new ApiError("Invalid User Id",400)
+  }
+  const videos = await Video.aggregate(
+    [
+      {
+        $match : {
+          owner : userId
+        }
+      },
+      {
+        $lookup : {
+          from : "users",
+          localField : "owner",
+          foreignField : "_id",
+          as : "userField"
+        }
+      },
+      {
+        $set : {
+          avatar : "$userField.avatar",
+          channel : "$userField.username"
+        }
+      },
+      {
+        $sort : {
+          createdAt : -1
+        }
+      }
+    ]
+  )
+
+  return res.status(200)
+  .json(
+    new ApiResponse("Videos Fetched Successfully!",videos,200)
+  )
+})
 
 export {
   uploadVideo,
@@ -252,5 +292,6 @@ export {
   getVideo,
   getVideos,
   userTopVideos,
-  uploadVideoDraft
+  uploadVideoDraft,
+  getCurrentUserVideos
 };
