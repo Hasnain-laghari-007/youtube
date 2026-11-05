@@ -2,6 +2,7 @@ import { React, useEffect, useState } from "react";
 import { api } from "../api/axios.js"
 import toast from "react-hot-toast"
 import { useNavigate } from "react-router-dom";
+import { formatViews,timeAgo } from "../utils/DateViewFormat.js";
 
 const Profile = () => {
   const navigate = useNavigate()
@@ -96,18 +97,14 @@ const Profile = () => {
 
                 <div className="desc mt-3 flex">
 
-                  <div className="w-9 h-9 rounded-[50%]">
-                    <img className="w-full h-full" src={video?.avatar} alt="avatar" />
-                  </div>
-
                   <div className="descriptionDiv flex flex-col items-start flex-1">
                     <p className="videoTitle text-[16px]/[22px] font-medium text-[#f1f1f1] line-clamp-2">
                       {
                         video.description || ""
                       }
                     </p>
-                    <p className="text-[14px] truncate font-normal text-[#aaaaaa] hover:text-white cursor-pointer">
-                      {video.channel || ""}
+                    <p className="text-[14px] truncate font-normal text-[#aaaaaa] cursor-pointer">
+                      {formatViews(video.views)} • {timeAgo(video.createdAt)}
                     </p>
                   </div>
 
