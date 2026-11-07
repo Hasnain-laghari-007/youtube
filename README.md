@@ -2,7 +2,7 @@
 
 A YouTube-style video platform built with the MERN stack. The backend is a production-minded REST API (JWT auth, Cloudinary media storage, Redis caching, rate limiting, MongoDB transactions), and the frontend is a React 19 + Tailwind CSS 4 app that is under active development.
 
-> **Project status:** Backend API is largely complete. On the frontend, the app shell (navbar, sidebar, layout, routing) and the **Login / Sign Up** pages (connected to the API) are done. The Home feed, video upload form, watch page, and profile/history pages are still in progress. See the [Roadmap](#️-roadmap).
+> **Project status:** Backend API is largely complete. On the frontend, the app shell (navbar, sidebar, layout, routing), **Login / Sign Up**, the **Video Upload** page (two-step upload with live progress) and a basic **Profile** page are done and connected to the API. The Home feed, watch page, and watch-history page are still in progress. See the [Roadmap](#️-roadmap).
 
 ## 🚀 Tech Stack
 
@@ -24,28 +24,41 @@ A YouTube-style video platform built with the MERN stack. The backend is a produ
 - **User Management:** Update profile details, change password, update avatar and cover image (old image is removed from Cloudinary), delete account, get current user.
 - **Channels:** Channel details by username, including subscribers, the channel's videos, `videosCount`, and an `isSubscribed` flag for the logged-in user.
 - **Watch History:** Aggregation-based watch history that returns watched videos along with the channel (owner) username.
-- **Video Upload & Management:** Upload a video with a thumbnail to Cloudinary, delete videos (cleans up Cloudinary assets), fetch a single video.
+- **Two-Step Video Upload (Draft → Publish):**
+  1. `POST /videos/upload-video` uploads only the video file to Cloudinary and creates a **draft** video document (stores `videoFile`, `duration`, `owner`).
+  2. `PATCH /videos/video/:id` adds the `title`, `description` and `thumbnail` to that draft (only the owner can publish it) and increments the user's `videosCount` inside a transaction.
+  - If publishing fails, the transaction is aborted and the draft video plus any uploaded thumbnail are cleaned up from Cloudinary/DB.
+  - This allows the frontend to start uploading the large video file immediately, while the user is still filling in the title/description/thumbnail.
+- **Video Management:** Delete videos (cleans up Cloudinary assets), fetch a single video, and fetch all videos of the **currently logged-in user** (with channel avatar and username, newest first).
 - **Paginated Video Feed:** Aggregation-based feed with pagination and configurable sorting (`page`, `limit`, `sortBy`, `sortType`). Public endpoint (no login required).
 - **Likes & Subscriptions:** Toggle like on a video and toggle subscribe on a channel. Both run inside transactions and keep the denormalized counters (`likes`, `subscribers`) in sync. Unique indexes prevent duplicate likes/subscriptions, and users cannot subscribe to themselves.
 - **Redis Caching:** A user's top 10 most-viewed videos are cached with a 2-minute TTL. Cache helpers fail safely, so the API keeps working even if Redis is down.
-- **Data Integrity:** MongoDB transactions keep video uploads/deletions and the user's `videosCount` consistent, with Cloudinary rollback if an upload fails.
+- **Data Integrity:** MongoDB transactions keep video publishing/deletion and the user's `videosCount` consistent, with Cloudinary rollback if an upload fails.
 - **Security Hardening:** Helmet headers, CORS with credentials, and rate limiting (100 requests / 15 minutes per IP).
 - **Consistent Error Handling:** Centralised error middleware with `ApiError` / `ApiResponse` helpers and an `asyncHandler` wrapper.
 
 ### Implemented (Frontend)
 
-- Responsive app layout with Navbar (search bar, Create button, notifications), collapsible Sidebar, and mobile overlay sidebar
-- Client-side routing with React Router (`/`, `/login`, `/signup`, `/upload-video`)
+- Responsive app layout with Navbar (search bar, Create button, notifications), collapsible Sidebar, and mobile overlay sidebar. The sidebar's **You** item links to the profile page.
+- Client-side routing with React Router (`/`, `/login`, `/signup`, `/upload-video`, `/profile`)
 - **Login page:** username-or-email login, password validation, show/hide password, toast feedback — connected to the API
 - **Sign Up page:** full registration form with avatar and cover image upload (multipart `FormData`), validation, toast feedback — connected to the API
+- **Video Upload page (connected to the API):**
+  - The video starts uploading to the server as soon as it is selected, with a live **progress bar** (Axios `onUploadProgress`)
+  - **Cancel** the in-flight upload (`AbortController`) and **delete** the uploaded draft with the trash button
+  - **Video preview** and **thumbnail preview** modals before submitting
+  - Form validation with React Hook Form (video type, title max 300 chars, thumbnail must be JPG/PNG/WEBP and under 5 MB)
+  - The Submit button stays disabled until the video upload has finished; on submit the title, description and thumbnail are sent to publish the draft, and the user is redirected to Home
+- **Profile page:** shows the logged-in user's cover image, avatar, full name, username and subscriber count, plus a grid of their uploaded videos (thumbnail, views, time since upload) with loading and empty states
 - Preconfigured Axios instance (`withCredentials`, base URL from `VITE_API_URL`) so cookies are sent automatically
 - Reusable `VideoCard` and `VideoCardSkeleton` components with a loading-skeleton state
+- Utility helpers for formatting view counts (`1.2K views`) and relative time (`3 days ago`)
 
 ### In Progress (Frontend)
 
 - **Home page:** currently renders placeholder cards with a fake loading delay; not yet connected to `GET /videos/videoPage`
-- **Video upload page:** form UI with validation (video file, title, description, thumbnail) is built; the submit handler and progress bar are not wired to the API yet
-- **History** and **Profile** pages exist as stubs and are not added to the router yet
+- **History** page exists as a stub and is not added to the router yet
+- **Auth state:** there is no global user state yet, so protected routes, the current user in the navbar and logout are still to do. The Profile page is currently outside the main `Layout` (no navbar/sidebar).
 
 ## 📁 Project Structure
 
@@ -69,11 +82,12 @@ youtube/
         ├── api/                # Axios instance
         ├── assets/             # Logo, placeholder avatar and thumbnail
         ├── components/
-        │   ├── common/         # VideoCard, VideoCardSkeleton, ApiLoader
+        │   ├── common/         # VideoCard, VideoCardSkeleton, VideoPreview, ThumbnailPreview, ApiLoader
         │   └── layout/         # Navbar, SideBar, OverlaySideBar, Layout
         ├── context/            # SideBar open/close state
-        ├── pages/              # Home, Login, SignUp, VideoUpload, History, Profile
+        ├── pages/              # Home, Login, SignUp, VideoUpload, Profile, History
         ├── routes/             # Router config
+        ├── utils/              # DateViewFormat (formatViews, timeAgo)
         ├── App.jsx
         └── main.jsx
 ```
@@ -179,10 +193,14 @@ Base URL: `/api/v1`  |  🔒 = requires authentication (JWT via cookie or `Autho
 | Method | Endpoint | Description |
 | --- | --- | --- |
 | GET | `/videoPage` | Paginated video feed (`page`, `limit`, `sortBy`, `sortType`) |
+| POST | `/upload-video` 🔒 | **Step 1:** upload the video file and create a draft (multipart: `Video`) |
+| PATCH | `/video/:id` 🔒 | **Step 2:** publish the draft (multipart: `Thumbnail`, plus `title`, `description`) |
 | GET | `/video/:id` 🔒 | Get a single video |
-| POST | `/upload-video` 🔒 | Upload video (multipart: `video`, `thumbnail`, plus `title`, `description`) |
-| DELETE | `/delete/:id` 🔒 | Delete a video |
+| GET | `/get-current-user-videos` 🔒 | All videos of the logged-in user (with channel `avatar` and `username`) |
+| DELETE | `/delete/:id` 🔒 | Delete a video (also used to discard an unpublished draft) |
 | GET | `/top-videos/:id` 🔒 | A user's top 10 videos by views (Redis-cached, 2-minute TTL) |
+
+> **Note:** The multipart field names for video uploads are case-sensitive: `Video` and `Thumbnail` (capital first letter).
 
 ### Likes — `/likes`
 
@@ -215,16 +233,29 @@ All responses follow the same shape:
 - [x] Redis caching with safe fallbacks
 - [x] App layout, sidebar, and routing
 - [x] Login / Signup pages and API integration
+- [x] Two-step video upload (draft → publish) on the backend
+- [x] Video upload page with progress bar, cancel, delete and previews
+- [x] Basic Profile page (cover, avatar, channel info, own videos grid)
 - [ ] Connect Home page to the video feed API
-- [ ] Wire up the video upload form (submit handler + upload progress)
 - [ ] Auth state on the frontend (protected routes, current user in navbar, logout)
+- [ ] Put the Profile page inside the main Layout (navbar + sidebar)
 - [ ] Global state with Redux Toolkit (user session, video feed)
 - [ ] Video watch page with player, like, and subscribe actions
-- [ ] Channel, Profile, and Watch History pages
+- [ ] Channel (other users) and Watch History pages
 - [ ] Comments system
 - [ ] View count tracking and watch-history updates on video watch
 - [ ] Search and trending videos (with Redis caching)
-- [ ] Backend hardening: ownership check on video delete, populate channel info in the video feed
+
+### 🐞 Known issues / backend hardening to-do
+
+- [ ] **Ownership check on video delete:** `DELETE /videos/delete/:id` currently deletes by id only; it should also match `owner: req.user._id`.
+- [ ] **`videosCount` drift:** deleting an unpublished draft still decrements `videosCount`, even though the count is only incremented when a video is published. Only decrement for published videos (e.g. when `title`/`thumbnail` exist).
+- [ ] **Thumbnail cleanup on delete:** the check `deleteVideo?.thumbnail` in `deleteVideo` should be `deletedVideo?.thumbnail`, otherwise the thumbnail stays on Cloudinary.
+- [ ] **Hide drafts from the public feed:** `GET /videos/videoPage` also returns unpublished drafts (no title/thumbnail). Filter on published videos only.
+- [ ] **Orphaned drafts:** if the user closes the tab after step 1 and never publishes, the draft and its Cloudinary video stay. Add a cleanup job or expiry for old drafts.
+- [ ] **Populate channel info in the video feed** (owner username/avatar) so the Home cards can show the channel.
+- [ ] **Profile page:** the video grid shows `video.description` where the `title` should be shown.
+- [ ] **Temp uploads:** add `public/temp/*` (except `.gitkeep`) to the backend `.gitignore` so leftover uploaded files are never committed.
 
 ## 🔐 Security Notes
 
