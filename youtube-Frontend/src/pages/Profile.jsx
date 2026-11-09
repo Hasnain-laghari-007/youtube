@@ -6,39 +6,6 @@ import { formatViews, timeAgo } from "../utils/DateViewFormat.js";
 
 const Profile = () => {
   const { userVideos, currentUser } = useLoaderData()
-  // const [channel, setChannel] = useState(null)
-  // const [loading, setLoading] = useState(true)
-  // const [videos, setVideos] = useState([])
-  // const [isVideoLoading, setIsVideoLoading] = useState(true)
-  // useEffect(() => {
-
-  //   async function fetchUserVideos() {
-  //     try {
-  //       const response = await api.get("/videos/get-current-user-videos")
-  //       setVideos(response.data.data)
-  //     } catch (error) {
-  //       toast.error("Error occur while fetching videos!")
-  //     }
-  //     finally{
-  //       setIsVideoLoading(false)
-  //     }
-  //   }
-
-  //   async function fetchCurrentUser() {
-  //     try {
-  //       const response = await api.get("/users/current-user")
-  //       setChannel(response.data.data ?? [])
-  //       setLoading(false)
-  //     } catch (error) {
-  //       toast.error(error.response?.data?.message || "Error occur while fetching videos")
-  //       if (error.reponse?.statusCode === 401) navigate("/")
-  //     }
-  //   }
-  //   fetchCurrentUser()
-  //   fetchUserVideos()
-  // }, [])
-
-  console.log("UserData", currentUser)
 
   return (
     <div className="max-w-321 mx-auto px-4 pb-7 md:px-6">
@@ -58,7 +25,7 @@ const Profile = () => {
 
       <div className=" flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 mt-4">
         {/* Profile image */}
-        
+
         <div className="relative w-20 h-20 sm:w-32 sm:h-32 md:w-40 md:h-40 rounded-full overflow-hidden bg-gray-700 shrink-0 flex items-center justify-center">
           {currentUser?.avatar &&
             <img
