@@ -1,6 +1,3 @@
-import { React, useEffect, useState } from "react";
-import { api } from "../api/axios.js"
-import toast from "react-hot-toast"
 import { useLoaderData } from "react-router-dom";
 import { formatViews, timeAgo } from "../utils/DateViewFormat.js";
 
