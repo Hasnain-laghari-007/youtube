@@ -1,4 +1,4 @@
-import { createBrowserRouter, Outlet,redirect } from "react-router-dom";
+import { createBrowserRouter, Outlet } from "react-router-dom";
 import Layout from "../components/layout/Layout.jsx";
 import Home from "../pages/Home.jsx";
 import SignUp from "../pages/SignUp.jsx";
@@ -20,63 +20,66 @@ const RootLayout = () => {
 
 const router = createBrowserRouter([
     {
-        element : <RootLayout/>,
-        children : [
+        element: <RootLayout />,
+        children: [
             {
-                path : "/",
-                element : <Layout/>,
-                children : [
+                path: "/",
+                element: <Layout />,
+                children: [
                     {
-                        path : "/",
-                        element : <Home/>,
-                        loader : async ()=>{
-                            await new Promise(resolve => setTimeout(resolve,2000))
+                        path: "/",
+                        element: <Home />,
+                        loader: async () => {
+                            await new Promise(resolve => setTimeout(resolve, 2000))
                             return null
                         }
                     }
                 ]
             },
             {
-                path : "/login",
-                element : <Login/>
+                path: "/login",
+                element: <Login />
             },
             {
-                path : "/signup",
-                element : <SignUp/>
+                path: "/signup",
+                element: <SignUp />
             },
             {
-                path : "/upload-video",
-                element : <VideoUpload/>
+                path: "/upload-video",
+                element: <VideoUpload />
             },
             {
-                path : "/profile",
-                element : <Profile/>,
-                loader : async ()=>{
-                    let userVideos = [],currentUser = {};
+                path: "/profile",
+                element: <Profile />,
+                loader: async () => {
+                    let userVideos = [], currentUser = {};
                     async function fetchUserVideos() {
-                          try {
+                        try {
                             const response = await api.get("/videos/get-current-user-videos")
                             userVideos = response.data.data
-                          } catch (error) {
-                            toast.error("Error occur while fetching videos!")
-                          }
+                        } catch (error) {
+                            if(error.response?.data?.statusCode !== 401){
+                                toast.error("Error occur while fetching videos!")
+                            }
                         }
-                    
-                        async function fetchCurrentUser() {
-                          try {
+                    }
+
+                    async function fetchCurrentUser() {
+                        try {
                             const response = await api.get("/users/current-user")
                             currentUser = response.data.data
-                          } catch (error) {
-                            toast.error(error.response?.data?.message || "Error occur while fetching user data!")
-                            if (error.response?.statusCode === 401) redirect("/")
-                          }
+                        } catch (error) {
+                            if (error.response?.data?.statusCode !== 401) {
+                                toast.error(error.response?.data?.message || "Error occur while fetching user data!")
+                            }
                         }
-                        await Promise.all([fetchCurrentUser(),fetchUserVideos()])
-                        return {userVideos,currentUser}
+                    }
+                    await Promise.all([fetchCurrentUser(), fetchUserVideos()])
+                    return { userVideos, currentUser }
                 }
             }
         ]
     }
 ])
 
-export {router}
+export { router }

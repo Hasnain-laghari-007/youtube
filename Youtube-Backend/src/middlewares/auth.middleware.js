@@ -14,6 +14,9 @@ const verifyJWT = asyncHandler(async(req,res,next)=>{
     try {
         decoded = jwt.verify(accessToken,process.env.ACCESS_TOKEN_SECRET)
     } catch (error) {
+        if(error.name === "TokenExpiredError"){
+            throw new ApiError("Access Token Expired",401)
+        }
         throw new ApiError("Invalid Access Token",400)
     }
     const user = await User.findById(decoded?._id)
