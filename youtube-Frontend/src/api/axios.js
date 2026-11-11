@@ -1,5 +1,4 @@
 import axios from "axios";
-import toast from "react-hot-toast";
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
@@ -36,7 +35,6 @@ api.interceptors.response.use(
         await refreshPromise;
       } catch (refreshError) {
           window.location.href = "/login";
-          toast.error("Please login");
         return Promise.reject(refreshError);
       }
 
