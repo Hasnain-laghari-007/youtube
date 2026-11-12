@@ -34,7 +34,6 @@ api.interceptors.response.use(
         }
         await refreshPromise;
       } catch (refreshError) {
-          window.location.href = "/login";
         return Promise.reject(refreshError);
       }
 

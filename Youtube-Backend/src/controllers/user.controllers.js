@@ -318,7 +318,7 @@ const userChannelDetails = asyncHandler(async (req, res) => {
 const refreshAccessToken = asyncHandler(async (req, res) => {
   let oldrefreshToken = req.cookies?.refreshToken || req.body?.refreshToken;
   if (!oldrefreshToken) {
-    throw new ApiError("Refresh Token is expired", 400);
+    throw new ApiError("Refresh Token is expired", 401);
   }
   let decoded;
   try {

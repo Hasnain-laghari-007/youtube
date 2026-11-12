@@ -1,4 +1,4 @@
-import { createBrowserRouter, Outlet } from "react-router-dom";
+import { createBrowserRouter, Outlet, redirect } from "react-router-dom";
 import Layout from "../components/layout/Layout.jsx";
 import Home from "../pages/Home.jsx";
 import SignUp from "../pages/SignUp.jsx";
@@ -38,7 +38,15 @@ const router = createBrowserRouter([
             },
             {
                 path: "/login",
-                element: <Login />
+                element: <Login />,
+                loader: async () => {
+                    try {
+                        await api.get("/users/current-user")
+                        return redirect("/")
+                    } catch {
+                        return null
+                    }
+                }
             },
             {
                 path: "/signup",
@@ -52,30 +60,18 @@ const router = createBrowserRouter([
                 path: "/profile",
                 element: <Profile />,
                 loader: async () => {
-                    let userVideos = [], currentUser = {};
-                    async function fetchUserVideos() {
-                        try {
-                            const response = await api.get("/videos/get-current-user-videos")
-                            userVideos = response.data.data
-                        } catch (error) {
-                            if(error.response?.data?.statusCode !== 401){
-                                toast.error("Error occur while fetching videos!")
-                            }
-                        }
-                    }
+                    try {
+                        const [Data, Videos] = await Promise.all([api.get("/users/current-user"), api.get("/videos/get-current-user-videos")])
 
-                    async function fetchCurrentUser() {
-                        try {
-                            const response = await api.get("/users/current-user")
-                            currentUser = response.data.data
-                        } catch (error) {
-                            if (error.response?.data?.statusCode !== 401) {
-                                toast.error(error.response?.data?.message || "Error occur while fetching user data!")
-                            }
+                        return { currentUser: Data.data?.data, userVideos: Videos.data.data }
+
+                    } catch (error) {
+                        if (error.response?.status === 401) {
+                            return redirect("/login")
                         }
+                        toast.error(error.response?.data?.message || "Something went wrong!");
+                        return { currentUser: null, userVideos: [] };
                     }
-                    await Promise.all([fetchCurrentUser(), fetchUserVideos()])
-                    return { userVideos, currentUser }
                 }
             }
         ]
