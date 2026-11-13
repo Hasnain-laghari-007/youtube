@@ -2,7 +2,7 @@
 
 A YouTube-style video platform built with the MERN stack. The backend is a production-minded REST API (JWT auth, Cloudinary media storage, Redis caching, rate limiting, MongoDB transactions), and the frontend is a React 19 + Tailwind CSS 4 app that is under active development.
 
-> **Project status:** Backend API is largely complete. On the frontend, the app shell (navbar, sidebar, layout, routing), **Login / Sign Up**, the **Video Upload** page (two-step upload with live progress) and a basic **Profile** page are done and connected to the API. The Home feed, watch page, and watch-history page are still in progress. See the [Roadmap](#️-roadmap).
+> **Project status:** Backend API is largely complete. On the frontend, the app shell (navbar, sidebar, layout, routing), **Login / Sign Up** (with automatic token refresh), the **Video Upload** page (two-step upload with live progress) and a basic **Profile** page are done and connected to the API. The Home feed, watch page, and watch-history page are still in progress. See the [Roadmap](#️-roadmap).
 
 ## 🚀 Tech Stack
 
@@ -51,14 +51,16 @@ A YouTube-style video platform built with the MERN stack. The backend is a produ
   - The Submit button stays disabled until the video upload has finished; on submit the title, description and thumbnail are sent to publish the draft, and the user is redirected to Home
 - **Profile page:** shows the logged-in user's cover image, avatar, full name, username and subscriber count, plus a grid of their uploaded videos (thumbnail, views, time since upload) with loading and empty states
 - Preconfigured Axios instance (`withCredentials`, base URL from `VITE_API_URL`) so cookies are sent automatically
+- **Automatic token refresh:** an Axios response interceptor catches a `401`, calls `/users/refresh-access-token` once (a shared promise prevents duplicate refresh calls when several requests fail together) and retries the original request
+- **Route loaders:** `/login` redirects to Home if the user is already logged in, and `/profile` loads the current user and their videos in the loader and redirects to `/login` on a `401`
 - Reusable `VideoCard` and `VideoCardSkeleton` components with a loading-skeleton state
 - Utility helpers for formatting view counts (`1.2K views`) and relative time (`3 days ago`)
 
 ### In Progress (Frontend)
 
-- **Home page:** currently renders placeholder cards with a fake loading delay; not yet connected to `GET /videos/videoPage`
+- **Home page:** currently renders placeholder cards with a fake loading delay (a 2 s delay in the route loader plus a `setTimeout` in the component); not yet connected to `GET /videos/videoPage`
 - **History** page exists as a stub and is not added to the router yet
-- **Auth state:** there is no global user state yet, so protected routes, the current user in the navbar and logout are still to do. The Profile page is currently outside the main `Layout` (no navbar/sidebar).
+- **Auth state:** there is no global user state yet, so protected routes (e.g. `/upload-video` has no login guard), the current user in the navbar and logout are still to do. The sidebar's Shorts and Subscriptions items are placeholders without a route. The Profile page is currently outside the main `Layout` (no navbar/sidebar).
 
 ## 📁 Project Structure
 
@@ -79,14 +81,14 @@ youtube/
 │       └── index.js            # Server entry point
 └── youtube-Frontend/
     └── src/
-        ├── api/                # Axios instance
+        ├── api/                # Axios instance + 401 auto-refresh interceptor
         ├── assets/             # Logo, placeholder avatar and thumbnail
         ├── components/
         │   ├── common/         # VideoCard, VideoCardSkeleton, VideoPreview, ThumbnailPreview, ApiLoader
         │   └── layout/         # Navbar, SideBar, OverlaySideBar, Layout
         ├── context/            # SideBar open/close state
         ├── pages/              # Home, Login, SignUp, VideoUpload, Profile, History
-        ├── routes/             # Router config
+        ├── routes/             # Router config (with loaders for /login and /profile)
         ├── utils/              # DateViewFormat (formatViews, timeAgo)
         ├── App.jsx
         └── main.jsx
@@ -236,6 +238,7 @@ All responses follow the same shape:
 - [x] Two-step video upload (draft → publish) on the backend
 - [x] Video upload page with progress bar, cancel, delete and previews
 - [x] Basic Profile page (cover, avatar, channel info, own videos grid)
+- [x] Automatic access-token refresh on the frontend (Axios interceptor)
 - [ ] Connect Home page to the video feed API
 - [ ] Auth state on the frontend (protected routes, current user in navbar, logout)
 - [ ] Put the Profile page inside the main Layout (navbar + sidebar)
@@ -255,7 +258,11 @@ All responses follow the same shape:
 - [ ] **Orphaned drafts:** if the user closes the tab after step 1 and never publishes, the draft and its Cloudinary video stay. Add a cleanup job or expiry for old drafts.
 - [ ] **Populate channel info in the video feed** (owner username/avatar) so the Home cards can show the channel.
 - [ ] **Profile page:** the video grid shows `video.description` where the `title` should be shown.
-- [ ] **Temp uploads:** add `public/temp/*` (except `.gitkeep`) to the backend `.gitignore` so leftover uploaded files are never committed.
+- [ ] **Temp uploads:** add `public/temp/*` (except `.gitkeep`) to the backend `.gitignore` so leftover uploaded files are never committed. `public/temp/` currently still contains leftover avatar/cover files (~15 MB) from earlier uploads; delete them and make sure Multer's temp files are removed after the Cloudinary upload.
+- [ ] **Home page:** remove the fake delay in the route loader and the `setTimeout` that runs on every render of `Home.jsx`; fetch the feed from the API instead.
+- [ ] **Channel/avatar shape:** `GET /videos/get-current-user-videos` returns `avatar` and `channel` as arrays (they come from `$userField.*`); use `$arrayElemAt` or `$unwind` so they are plain strings.
+- [ ] **Route guards:** `/upload-video` is reachable without being logged in; add a loader that redirects to `/login` on a `401`.
+- [ ] **Cleanup:** the empty `src/app/` and `src/services/` folders in the frontend are unused.
 
 ## 🔐 Security Notes
 
