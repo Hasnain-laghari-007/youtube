@@ -186,6 +186,20 @@ const getVideos = asyncHandler(async (req, res) => {
       $match: {},
     },
     {
+      $lookup : {
+        from : "users",
+        localField : "owner",
+        foreignField : "_id",
+        as : "videoOwner"
+      }
+    },
+    {
+      $set : {
+        username : "$videoOwner.username",
+        avatar : "$videoOwner.avatar"
+      }
+    },
+    {
       $sort: {
         [sortBy]: sortType,
       },

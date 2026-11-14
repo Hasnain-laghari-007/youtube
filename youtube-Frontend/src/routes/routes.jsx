@@ -30,8 +30,13 @@ const router = createBrowserRouter([
                         path: "/",
                         element: <Home />,
                         loader: async () => {
-                            await new Promise(resolve => setTimeout(resolve, 2000))
-                            return null
+                            try {
+                                const response = await api.get("/videos/videoPage")
+                                return {videos : response.data.data.docs}
+                            } catch (error) {
+                                toast.error( error.response?.data?.message || "Something went wrong!")
+                                return {videos : []}
+                            }
                         }
                     }
                 ]
