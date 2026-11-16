@@ -13,7 +13,7 @@ const Home = () => {
         ))
         :
         videos.map((video) => (
-          <Link key={video._id} to={`/watch/${video._id}`}>
+          <Link key={video._id} to={`/watch/:${video._id}`}>
             <VideoCard video = {video} />
           </Link>
         ))
