@@ -8,6 +8,7 @@ import Profile from "../pages/Profile.jsx"
 import ApiLoader from "../components/common/ApiLoader.jsx"
 import { api } from "../api/axios.js";
 import toast from "react-hot-toast";
+import WatchPage from "../pages/WatchPage.jsx";
 
 const RootLayout = () => {
     return (
@@ -76,6 +77,19 @@ const router = createBrowserRouter([
                         }
                         toast.error(error.response?.data?.message || "Something went wrong!");
                         return { currentUser: null, userVideos: [] };
+                    }
+                }
+            },
+            {
+                path : "/watch/:id",
+                element : <WatchPage/>,
+                loader : async({params})=>{
+                    try {
+                        let response = await api.get(`/videos/video/${params.id}`)
+                        return {video : response.data?.data}
+                    } catch (error) {
+                        toast.error(error.response?.data?.message || "Something went wrong!")
+                        return {video : {}}
                     }
                 }
             }
