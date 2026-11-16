@@ -1,6 +1,6 @@
 import VideoCard from "../components/common/VideoCard.jsx"
 import VideoCardSkeletion from "../components/common/VideoCardSkeletion.jsx"
-import { useLoaderData } from "react-router-dom"
+import { useLoaderData,Link } from "react-router-dom"
 
 const Home = () => {
   const { videos } = useLoaderData()
@@ -13,7 +13,9 @@ const Home = () => {
         ))
         :
         videos.map((video) => (
-          <VideoCard key={video?._id} video = {video} />
+          <Link key={video._id} to={`/watch/${video._id}`}>
+            <VideoCard video = {video} />
+          </Link>
         ))
       }
     </div>
