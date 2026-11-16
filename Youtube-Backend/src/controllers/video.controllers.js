@@ -166,13 +166,58 @@ const getVideo = asyncHandler(async (req, res) => {
     throw new ApiError("Invalid Id", 400);
   }
 
-  const video = await Video.findById(id);
+  const video = await Video.aggregate([
+    {
+      $match : {
+        _id : new mongoose.Types.ObjectId(id)
+      }
+    },
+    {
+        $lookup : {
+          from : "users",
+          localField : "owner",
+          foreignField : "_id",
+          as : "videoOwnerInfo",
+          pipeline : [
+            {
+              $project : {
+                avatar : 1,
+                username : 1,
+                _id : 0,
+                subscribers : 1
+              }
+            }
+          ]
+        }
+    },
+    {
+      $addFields : {
+        info : {$first : "$videoOwnerInfo"}
+      }
+    },
+    {
+      $set : {
+        owner : {
+          avatar : "$info.avatar",
+          username : "$info.username",
+          subscribers : "$info.subscribers"
+        }
+      }
+    },
+    {
+      $project : {
+        info : 0,
+        videoOwnerInfo : 0
+      }
+    }
+  ]);
+  
   if (!video) {
     throw new ApiError("Video not found", 404);
   }
   return res
     .status(200)
-    .json(new ApiResponse("Video fetched succesfully", video, 200));
+    .json(new ApiResponse("Video fetched succesfully", video[0], 200));
 });
 
 const getVideos = asyncHandler(async (req, res) => {
