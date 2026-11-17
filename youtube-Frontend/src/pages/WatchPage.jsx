@@ -1,16 +1,8 @@
 import React from 'react'
-import { useLoaderData } from 'react-router-dom'
-
-// YouTube dark mode colors:
-// page bg      #0f0f0f
-// main text    #f1f1f1
-// grey text    #aaaaaa
-// buttons      #272727 (hover #3f3f3f)
-// dividers     #3f3f3f
+import { useLoaderData,Link } from 'react-router-dom'
 
 const WatchPage = () => {
   let { video } = useLoaderData()
-  console.log("Watch Page Data : ",video)
 
   return (
     <div className="min-h-screen bg-[#0f0f0f] text-[#f1f1f1]">
@@ -42,9 +34,9 @@ const WatchPage = () => {
                 className="h-10 w-10 rounded-full object-cover"
               />
               <div className="leading-tight">
-                <p className="text-base font-medium">
+                <Link to={`/user/${video?.owner?.username}`} className="text-base font-medium">
                   {video?.owner?.username || 'Channel name'}
-                </p>
+                </Link>
                 <p className="text-xs text-[#aaaaaa]">
                   {video?.owner?.subscribers ?? 0} subscribers
                 </p>

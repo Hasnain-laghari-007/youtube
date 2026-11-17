@@ -2,6 +2,7 @@ import { createBrowserRouter, Outlet, redirect } from "react-router-dom";
 import Layout from "../components/layout/Layout.jsx";
 import Home from "../pages/Home.jsx";
 import SignUp from "../pages/SignUp.jsx";
+import UserProfile from "../pages/UserProfile.jsx";
 import Login from "../pages/Login.jsx";
 import VideoUpload from "../pages/VideoUpload.jsx";
 import Profile from "../pages/Profile.jsx"
@@ -77,6 +78,19 @@ const router = createBrowserRouter([
                         }
                         toast.error(error.response?.data?.message || "Something went wrong!");
                         return { currentUser: null, userVideos: [] };
+                    }
+                }
+            },
+            {
+                path : "/user/:username",
+                element : <UserProfile/>,
+                loader : async({params})=>{
+                    try {
+                        const res = await api.get(`/users/channel/${params.username}`)
+                        return {user : res.data.data}
+                    } catch (error) {
+                        toast.error( error.response?.data?.message || "Something went wrong!")
+                        return {user  : {} }
                     }
                 }
             },
