@@ -7,10 +7,10 @@ const router = Router()
 
 router.route("/video/:id").patch(verifyJWT, upload.single("Thumbnail"), uploadVideo);
 router.route("/upload-video").post(verifyJWT,upload.single("Video"),uploadVideoDraft)
+router.route("/video/:id").get(getVideo)
 
 router.route("/delete/:id").delete(verifyJWT,deleteVideo)
 router.route("/get-current-user-videos").get(verifyJWT,getCurrentUserVideos)
-router.route("/video/:id").get(verifyJWT,getVideo)
 router.route("/videoPage").get(getVideos)
 router.route("/top-videos/:id").get(verifyJWT,userTopVideos)
 export default router
