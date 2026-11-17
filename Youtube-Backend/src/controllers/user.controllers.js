@@ -91,10 +91,10 @@ const login = asyncHandler(async (req, res) => {
   if (String(password).trim() === "" || String(password).length < 8) {
     throw new ApiError("Invalid Password", 400);
   }
-  const findBy = UsernameOrEmail.includes("@") === true ? "email" : "username"
+  const findBy = UsernameOrEmail.includes("@") === true ? "email" : "username";
 
   const user = await User.findOne({
-    [findBy] : UsernameOrEmail
+    [findBy]: UsernameOrEmail,
   }).select("+password");
   if (!user) {
     throw new ApiError("User not found", 404);
@@ -105,9 +105,16 @@ const login = asyncHandler(async (req, res) => {
   }
   const { refreshToken, accessToken } =
     await generate_Refresh_And_Access_Tokens(user?._id);
-  const options = {
+  const accessTokenOptions = {
     httpOnly: true,
     secure: true,
+    maxAge: 1 * 24 * 60 * 60 * 1000,
+  };
+
+  const refreshTokenOptions = {
+    httpOnly: true,
+    secure: true,
+    maxAge: 7 * 24 * 60 * 60 * 1000,
   };
   let responseObj = {
     username: user.username,
@@ -118,8 +125,8 @@ const login = asyncHandler(async (req, res) => {
   };
   return res
     .status(200)
-    .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken", refreshToken, options)
+    .cookie("accessToken", accessToken, accessTokenOptions)
+    .cookie("refreshToken", refreshToken, refreshTokenOptions)
     .json(new ApiResponse("User login successfully", responseObj, 200));
 });
 
@@ -304,8 +311,8 @@ const userChannelDetails = asyncHandler(async (req, res) => {
         coverImage: 1,
         videos: 1,
         isSubscribed: 1,
-        subscribers : 1,
-        videosCount : 1
+        subscribers: 1,
+        videosCount: 1,
       },
     },
   ]);
@@ -336,14 +343,21 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
   const { refreshToken, accessToken } =
     await generate_Refresh_And_Access_Tokens(user._id);
-  const options = {
+  const accessTokenOptions = {
     httpOnly: true,
     secure: true,
-  };
+    maxAge: 1 * 24 * 60 * 60 * 1000
+};
+
+const refreshTokenOptions = {
+    httpOnly: true,
+    secure: true,
+    maxAge: 7 * 24 * 60 * 60 * 1000
+};
   return res
     .status(200)
-    .cookie("accessToken", accessToken, options)
-    .cookie("refreshToken", refreshToken, options)
+    .cookie("accessToken", accessToken, accessTokenOptions)
+    .cookie("refreshToken", refreshToken, refreshTokenOptions)
     .json(
       new ApiResponse(
         "Access Token refreshed successfully",
@@ -385,53 +399,58 @@ const getWatchHistory = asyncHandler(async (req, res) => {
   let userId = req.user?._id;
   const user = await User.aggregate([
     {
-        $match : {
-          _id : new mongoose.Types.ObjectId(userId)
-        }
+      $match: {
+        _id: new mongoose.Types.ObjectId(userId),
+      },
     },
     {
-      $lookup : {
-        from : "videos",
-        localField : "watchHistory",
-        foreignField : "_id",
-        as : "watchedVideos",
-        pipeline : [
+      $lookup: {
+        from: "videos",
+        localField: "watchHistory",
+        foreignField: "_id",
+        as: "watchedVideos",
+        pipeline: [
           {
-            $lookup : {
-              from : "users",
-              localField : "owner",
-              foreignField : "_id",
-              as : "videoOwner",
-              pipeline : [
+            $lookup: {
+              from: "users",
+              localField: "owner",
+              foreignField: "_id",
+              as: "videoOwner",
+              pipeline: [
                 {
-                  $project : {
-                    username : 1,
-                    _id : 0
-                  }
-                }
-              ]
-            }
+                  $project: {
+                    username: 1,
+                    _id: 0,
+                  },
+                },
+              ],
+            },
           },
           {
-            $addFields : {
-              channel : {$first : "$videoOwner.username"}
-            }
-          }
-        ]
-      }
+            $addFields: {
+              channel: { $first: "$videoOwner.username" },
+            },
+          },
+        ],
+      },
     },
     {
-      $project : {
-        watchedVideos : 1,
-        _id : 0
-      }
-    }
+      $project: {
+        watchedVideos: 1,
+        _id: 0,
+      },
+    },
   ]);
-  if(!user?.length) throw new ApiError("User not found",404)
-  return res.status(200)
-  .json(
-    new ApiResponse("watch history fetched successfully",user[0]?.watchedVideos,200)
-  )
+  if (!user?.length) throw new ApiError("User not found", 404);
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        "watch history fetched successfully",
+        user[0]?.watchedVideos,
+        200,
+      ),
+    );
 });
 
 export {
@@ -446,5 +465,5 @@ export {
   refreshAccessToken,
   deleteAccount,
   getCurrentUser,
-  getWatchHistory
+  getWatchHistory,
 };
