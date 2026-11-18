@@ -1,6 +1,7 @@
 import React from 'react'
-import { useLoaderData } from 'react-router-dom'
-import { formatViews , timeAgo } from '../utils/DateViewFormat'
+import { useLoaderData, Link } from 'react-router-dom'
+import { formatViews, timeAgo } from '../utils/DateViewFormat'
+import { Play } from 'lucide-react'
 
 const UserProfile = () => {
     let { user } = useLoaderData()
@@ -51,7 +52,7 @@ const UserProfile = () => {
                         </div>
                         :
                         user.videos.map((video) => (
-                            <div key={video._id} className="flex flex-col cursor-pointer">
+                            <Link to={`/watch/${video._id}`} key={video._id} className="flex flex-col cursor-pointer">
                                 <img className="aspect-video w-full object-cover rounded-xl" src={video.thumbnail} alt="thumbnail" />
 
                                 <div className="desc mt-3 flex">
@@ -62,14 +63,15 @@ const UserProfile = () => {
                                                 video.description || ""
                                             }
                                         </p>
-                                        <p className="text-[14px] truncate font-normal text-[#aaaaaa] cursor-pointer">
-                                            {formatViews(video.views)} • {timeAgo(video.createdAt)}
+                                        <p className="text-[13px] flex items-center truncate font-normal text-[#aaaaaa] cursor-pointer">
+                                            <Play size={14} /> <span className="ml-1.5 mr-2">{formatViews(video.views)} </span>
+                                            <span> {timeAgo(video.createdAt)}</span>
                                         </p>
                                     </div>
 
                                 </div>
 
-                            </div>
+                            </Link>
                         ))
                 }
             </div>

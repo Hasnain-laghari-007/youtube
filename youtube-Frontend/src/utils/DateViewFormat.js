@@ -27,7 +27,7 @@ export function timeAgo(date) {
 
   for (const { label, seconds: s } of intervals) {
     const value = Math.floor(seconds / s)
-    if (value >= 1) return `${value}${label}${value > 1 ? "s" : ""} ago`
+    if (value >= 1) return `${value}${label} ago`
   }
   return "Just now"
 }
