@@ -43,6 +43,7 @@ const router = createBrowserRouter([
                     }
                 ]
             },
+            // login Page Route
             {
                 path: "/login",
                 element: <Login />,
@@ -55,14 +56,17 @@ const router = createBrowserRouter([
                     }
                 }
             },
+            // Sign up Page Route
             {
                 path: "/signup",
                 element: <SignUp />
             },
+            // Video Upload Page Route
             {
                 path: "/upload-video",
                 element: <VideoUpload />
             },
+            // My Profile Profile Page Route
             {
                 path: "/profile",
                 element: <Profile />,
@@ -81,6 +85,7 @@ const router = createBrowserRouter([
                     }
                 }
             },
+            // User Profile Page Route
             {
                 path : "/user/:username",
                 element : <UserProfile/>,
@@ -94,6 +99,7 @@ const router = createBrowserRouter([
                     }
                 }
             },
+            // Watch Page Route
             {
                 path : "/watch/:id",
                 element : <WatchPage/>,
