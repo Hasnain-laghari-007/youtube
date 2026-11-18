@@ -1,7 +1,16 @@
 import { Play } from "lucide-react"
 import { formatViews, timeAgo } from "../../utils/DateViewFormat"
+import { useNavigate } from "react-router-dom"
 
 const VideoCard = ({ video }) => {
+    const navigate = useNavigate()
+
+    function handleClick(e){
+        e.stopPropagation()
+        e.preventDefault()
+        navigate(`/user/${video?.username}`)
+    }
+
     return (
         <div className="videoCard flex flex-col">
             <img className="aspect-video w-full object-cover rounded-xl" src={video?.thumbnail} alt="thumbnail" />
@@ -21,7 +30,7 @@ const VideoCard = ({ video }) => {
                     </p>
 
                     <div className="flex items-center gap-x-2">
-                        <button type="button" className="channel text-[14px] truncate font-normal text-[#aaaaaa] hover:text-white cursor-pointer">
+                        <button onClick={handleClick} className="channel text-[14px] truncate font-normal text-[#aaaaaa] hover:text-white cursor-pointer relative z-200">
                             {video?.username}
                         </button>
 
