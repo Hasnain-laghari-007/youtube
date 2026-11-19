@@ -1,10 +1,35 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { useLoaderData, Link } from 'react-router-dom'
-import { formatViews, timeAgo } from '../utils/DateViewFormat'
+import { formatViews, timeAgo } from '../utils/DateViewFormat.js'
 import { Play } from 'lucide-react'
+import { api } from "../api/axios.js"
+import toast from "react-hot-toast"
 
 const UserProfile = () => {
     let { user } = useLoaderData()
+    const [subscribed, setSubscribed] = useState(user?.isSubscribed)
+    const [subscribePro, setsubscribePro] = useState(false)
+    const [blocked, setBlocked] = useState(false)
+
+    async function handleClick() {
+        try {
+            setsubscribePro(true)
+            const response = await api.post(`/subscription/toggle/v/${user?._id}`)
+            setSubscribed(response.data?.data?.subscribe)
+        } catch (error) {
+            if (error.response?.status === 429) {
+                setBlocked(true)
+                toast.error("Too many attempts. Try again after 1 minutes.", { id: "too-many-subscribe-requests" })
+                setTimeout(() => setBlocked(false), 60 * 1000)
+            } else {
+                toast.error(error.response?.data?.message || "Something went wrong!",{id : "subscribe-error"})
+            }
+        }
+        finally {
+            setsubscribePro(false)
+        }
+    }
+
     return (
         <div className="max-w-321 mx-auto px-4 pb-7 md:px-6">
 
@@ -34,11 +59,21 @@ const UserProfile = () => {
                     }
                 </div>
 
-                <div className="text-center sm:text-left ">
+                <div className="text-center sm:text-left">
                     <h1 className="text-2xl md:text-4xl font-bold">{user?.fullName}</h1>
                     <p className="text-sm text-gray-500 mt-1">
                         @{user?.username} • {user?.subscribers?.length || 0} subscribers
                     </p>
+
+                    <button
+                        type="button"
+                        disabled={subscribePro || blocked}
+                        onClick={handleClick}
+                        className={`subscribeBtn h-9.5 px-5 max-[661px]:mx-auto my-3 rounded-full text-sm font-medium transition-colors duration-150 cursor-pointer flex items-center justify-center select-none $ bg-white text-black hover:bg-[#ededed] disabled:bg-[#b8b8b8] disabled:cursor-not-allowed`}
+                    >
+                        {subscribed ? "Subscribed" : "Subscribe"}
+                    </button>
+
                 </div>
 
             </div>
