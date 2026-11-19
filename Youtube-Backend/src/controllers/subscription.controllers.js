@@ -11,12 +11,12 @@ const toggleSubscribe = asyncHandler(async (req, res) => {
   }
 
   if(userId.toString() === channelId.toString()){
-        throw new ApiError("You cannot subscribe yourSelf",400)
+        throw new ApiError("You cannot subscribe yourself",400)
     }
     
   const session = await mongoose.startSession();
   try {
-    await session.startTransaction();
+    session.startTransaction();
 
     const isAlreadySubscribed = await Subscription.findOne({
       subscriber: userId,
@@ -36,7 +36,7 @@ const toggleSubscribe = asyncHandler(async (req, res) => {
       await session.commitTransaction();
       return res
         .status(200)
-        .json(new ApiResponse("Unsubscribed successfully", {}, 200));
+        .json(new ApiResponse("Unsubscribed successfully", {subscribe : false}, 200));
     } else {
       await Subscription.create([{ subscriber: userId, channel: channelId }], {
         session,
@@ -48,7 +48,7 @@ const toggleSubscribe = asyncHandler(async (req, res) => {
       await session.commitTransaction();
       return res
         .status(200)
-        .json(new ApiResponse("Subscribed successfully", {}, 200));
+        .json(new ApiResponse("Subscribed successfully", {subscribe : true}, 200));
     }
   } catch (error) {
     await session.abortTransaction();
