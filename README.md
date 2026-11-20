@@ -2,7 +2,7 @@
 
 A YouTube-style video platform built with the MERN stack. The backend is a production-minded REST API (JWT auth, Cloudinary media storage, Redis caching, rate limiting, MongoDB transactions), and the frontend is a React 19 + Tailwind CSS 4 app that is under active development.
 
-> **Project status:** Backend API is largely complete. On the frontend, the app shell (navbar, sidebar, layout, routing), **Login / Sign Up** (with automatic token refresh), the **Video Upload** page (two-step upload with live progress) and a basic **Profile** page are done and connected to the API. The Home feed, watch page, and watch-history page are still in progress. See the [Roadmap](#️-roadmap).
+> **Project status:** Backend API is largely complete. On the frontend, the app shell (navbar, sidebar, layout, routing), **Login / Sign Up** (with automatic token refresh), the **Video Upload** page (two-step upload with live progress), the **Home feed**, **watch page**, and basic **Profile** pages are done and connected to the API. The History page and several watch-page actions are still in progress. See the [Roadmap](#️-roadmap).
 
 ## 🚀 Tech Stack
 
@@ -58,9 +58,9 @@ A YouTube-style video platform built with the MERN stack. The backend is a produ
 
 ### In Progress (Frontend)
 
-- **Home page:** currently renders placeholder cards with a fake loading delay (a 2 s delay in the route loader plus a `setTimeout` in the component); not yet connected to `GET /videos/videoPage`
 - **History** page exists as a stub and is not added to the router yet
 - **Auth state:** there is no global user state yet, so protected routes (e.g. `/upload-video` has no login guard), the current user in the navbar and logout are still to do. The sidebar's Shorts and Subscriptions items are placeholders without a route. The Profile page is currently outside the main `Layout` (no navbar/sidebar).
+- **Watch page:** the player and video/channel information are implemented, but like, subscribe, share, save, comments, suggested videos, and view-count tracking are still pending.
 
 ## 📁 Project Structure
 
@@ -87,7 +87,7 @@ youtube/
         │   ├── common/         # VideoCard, VideoCardSkeleton, VideoPreview, ThumbnailPreview, ApiLoader
         │   └── layout/         # Navbar, SideBar, OverlaySideBar, Layout
         ├── context/            # SideBar open/close state
-        ├── pages/              # Home, Login, SignUp, VideoUpload, Profile, History
+        ├── pages/              # Home, Login, SignUp, VideoUpload, Profile, UserProfile, WatchPage, History
         ├── routes/             # Router config (with loaders for /login and /profile)
         ├── utils/              # DateViewFormat (formatViews, timeAgo)
         ├── App.jsx
@@ -98,7 +98,7 @@ youtube/
 
 ### Prerequisites
 
-- Node.js 18+ and npm
+- Node.js 20.19+ or 22.12+ and npm
 - A MongoDB instance (local or [MongoDB Atlas](https://www.mongodb.com/atlas)). **Replica set is required** because the API uses transactions (Atlas works out of the box).
 - A Redis instance (defaults to `redis://localhost:6379`)
 - A free [Cloudinary](https://cloudinary.com/) account
@@ -186,7 +186,7 @@ Base URL: `/api/v1`  |  🔒 = requires authentication (JWT via cookie or `Autho
 | PATCH | `/change-password` 🔒 | Change password (`oldPassword`, `newPassword`) |
 | PATCH | `/avatar` 🔒 | Update avatar (multipart: `avatar`) |
 | PATCH | `/cover-image` 🔒 | Update cover image (multipart: `coverImage`) |
-| GET | `/channel/:username` 🔒 | Channel details (subscribers, videos, `isSubscribed`) |
+| GET | `/channel/:username` | Channel details (subscribers, videos, `isSubscribed`) |
 | GET | `/watch-history` 🔒 | Watch history |
 | DELETE | `/delete-account` 🔒 | Delete account |
 
@@ -239,12 +239,13 @@ All responses follow the same shape:
 - [x] Video upload page with progress bar, cancel, delete and previews
 - [x] Basic Profile page (cover, avatar, channel info, own videos grid)
 - [x] Automatic access-token refresh on the frontend (Axios interceptor)
-- [ ] Connect Home page to the video feed API
+- [x] Connect Home page to the video feed API
 - [ ] Auth state on the frontend (protected routes, current user in navbar, logout)
 - [ ] Put the Profile page inside the main Layout (navbar + sidebar)
 - [ ] Global state with Redux Toolkit (user session, video feed)
-- [ ] Video watch page with player, like, and subscribe actions
-- [ ] Channel (other users) and Watch History pages
+- [ ] Watch page actions (like, subscribe, share, save, comments, suggestions)
+- [x] Channel (other users) page
+- [ ] Watch History page
 - [ ] Comments system
 - [ ] View count tracking and watch-history updates on video watch
 - [ ] Search and trending videos (with Redis caching)
@@ -259,10 +260,9 @@ All responses follow the same shape:
 - [ ] **Populate channel info in the video feed** (owner username/avatar) so the Home cards can show the channel.
 - [ ] **Profile page:** the video grid shows `video.description` where the `title` should be shown.
 - [ ] **Temp uploads:** add `public/temp/*` (except `.gitkeep`) to the backend `.gitignore` so leftover uploaded files are never committed. `public/temp/` currently still contains leftover avatar/cover files (~15 MB) from earlier uploads; delete them and make sure Multer's temp files are removed after the Cloudinary upload.
-- [ ] **Home page:** remove the fake delay in the route loader and the `setTimeout` that runs on every render of `Home.jsx`; fetch the feed from the API instead.
+- [x] **Home page:** fetch the feed from `GET /videos/videoPage` instead of using placeholder cards.
 - [ ] **Channel/avatar shape:** `GET /videos/get-current-user-videos` returns `avatar` and `channel` as arrays (they come from `$userField.*`); use `$arrayElemAt` or `$unwind` so they are plain strings.
 - [ ] **Route guards:** `/upload-video` is reachable without being logged in; add a loader that redirects to `/login` on a `401`.
-- [ ] **Cleanup:** the empty `src/app/` and `src/services/` folders in the frontend are unused.
 
 ## 🔐 Security Notes
 
