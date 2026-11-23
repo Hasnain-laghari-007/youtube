@@ -1,8 +1,39 @@
-import React from 'react'
-import { useLoaderData,Link } from 'react-router-dom'
+import React, { useState } from 'react'
+import { useLoaderData, Link, useNavigate, useLocation } from 'react-router-dom'
+import { useAuthStore } from '../store/useAuthStore'
+import toast from 'react-hot-toast'
+import { api } from '../api/axios'
 
 const WatchPage = () => {
+  const location = useLocation()
+  const navigate = useNavigate()
   let { video } = useLoaderData()
+  const [subscribed, setSubscribed] = useState(video?.channelSubscribed || false)
+  const [subsProcess, setSubProcess] = useState(false)
+
+  let user = useAuthStore(s => s.user)
+  let isAuthLoading = useAuthStore(s => s.isAuthLoading)
+
+  async function handleClick() {
+    if(isAuthLoading) return
+    if (user === null) {
+      navigate(`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`)
+      return
+    }
+    const prev = subscribed
+    setSubscribed(!prev)
+    setSubProcess(true)
+    try {
+      let res = await api.post(`/subscription/toggle/v/${video?.owner?._id}`)
+      toast.success(res.data?.data?.message)
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Something went wrong", { id: "subscription-error" })
+      setSubscribed(prev)
+    }
+    finally {
+      setSubProcess(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#0f0f0f] text-[#f1f1f1]">
@@ -42,8 +73,16 @@ const WatchPage = () => {
                 </p>
               </div>
               {/* Subscribe button */}
-              <button className="ml-3 rounded-full bg-[#f1f1f1] px-4 py-2 text-sm font-medium text-[#0f0f0f] hover:bg-[#d9d9d9]">
-                Subscribe
+              <button
+                type="button"
+                disabled={subsProcess || isAuthLoading}
+                onClick={handleClick}
+                className={`ml-3 inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-colors duration-150 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 ${subscribed
+                  ? "bg-[#272727] text-[#f1f1f1] hover:bg-[#3f3f3f]"
+                  : "bg-[#f1f1f1] text-[#0f0f0f] hover:bg-[#d9d9d9]"
+                  }`}
+              >
+                {subscribed ? "Subscribed" : "Subscribe"}
               </button>
             </div>
 
