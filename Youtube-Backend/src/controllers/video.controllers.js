@@ -11,6 +11,7 @@ import {
 import { Video } from "../models/video.model.js";
 import mongoose from "mongoose";
 import { User } from "../models/user.model.js";
+import {Subscription} from "../models/subscription.model.js"
 
 const uploadVideo = asyncHandler(async (req, res) => {
   const { title, description = "" } = req.body;
@@ -162,6 +163,7 @@ const deleteVideo = asyncHandler(async (req, res) => {
 
 const getVideo = asyncHandler(async (req, res) => {
   const id = req.params?.id;
+  const userId = req.user?._id;
   if (!id || !mongoose.Types.ObjectId.isValid(id)) {
     throw new ApiError("Invalid Id", 400);
   }
@@ -183,7 +185,6 @@ const getVideo = asyncHandler(async (req, res) => {
               $project : {
                 avatar : 1,
                 username : 1,
-                _id : 0,
                 subscribers : 1
               }
             }
@@ -200,7 +201,8 @@ const getVideo = asyncHandler(async (req, res) => {
         owner : {
           avatar : "$info.avatar",
           username : "$info.username",
-          subscribers : "$info.subscribers"
+          subscribers : "$info.subscribers",
+          _id : "$info._id"
         }
       }
     },
@@ -212,9 +214,20 @@ const getVideo = asyncHandler(async (req, res) => {
     }
   ]);
   
-  if (!video) {
+  if (!video.length) {
     throw new ApiError("Video not found", 404);
   }
+  const isSubscribed = await Subscription.findOne({
+    subscriber: userId,
+    channel: video[0]?.owner?._id
+  });
+  if(isSubscribed){
+    video[0].channelSubscribed = true
+  }
+  else {
+    video[0].channelSubscribed = false
+  }
+
   return res
     .status(200)
     .json(new ApiResponse("Video fetched succesfully", video[0], 200));
