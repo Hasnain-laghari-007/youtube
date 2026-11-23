@@ -1,18 +1,24 @@
 import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { api } from "../api/axios.js"
-import { useNavigate } from "react-router-dom"
+import { useNavigate,useSearchParams } from "react-router-dom"
 import toast from "react-hot-toast"
 import { NavLink } from "react-router-dom"
+import { useAuthStore } from "../store/useAuthStore.js"
 
 const Login = () => {
   const [showPass, setShowPass] = useState(false)
+  const [searchParams] = useSearchParams()
+  const redirect = searchParams.get("redirect")
+  const navigate = useNavigate()
+  const setUser = useAuthStore(s => s.setUser)
+
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm()
-  const navigate = useNavigate()
+  
 
   async function login(data) {
     const val = data.username_Email
@@ -29,6 +35,12 @@ const Login = () => {
           error: err => err.response?.data?.message,
         }
       );
+        const user = await api.get("/users/current-user")
+        setUser(user.data?.data)
+      if(redirect && redirect.startsWith("/") && !redirect.startsWith("//")){
+        navigate(redirect)
+        return
+      }
       navigate("/")
     } catch (error) { }
   }
