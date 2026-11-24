@@ -2,7 +2,7 @@ import "dotenv/config"
 import jwt from "jsonwebtoken"
 import { User } from "../models/user.model.js"
 
-const optionalVerifyJWT = async(req,res,next)=>{
+const optionalVerifyJWT = async(req,_,next)=>{
     try{
     const accessToken = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ","")
 
