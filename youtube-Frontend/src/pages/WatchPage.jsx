@@ -10,22 +10,29 @@ const WatchPage = () => {
   let { video } = useLoaderData()
   const [subscribed, setSubscribed] = useState(video?.channelSubscribed || false)
   const [subsProcess, setSubProcess] = useState(false)
+  const [subscribers, setSubscribers] = useState(video?.owner?.subscribers || 0)
 
+  console.log(video)
   let user = useAuthStore(s => s.user)
   let isAuthLoading = useAuthStore(s => s.isAuthLoading)
 
   async function handleClick() {
-    if(isAuthLoading) return
+    if (isAuthLoading) return
     if (user === null) {
       navigate(`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`)
       return
     }
     const prev = subscribed
+    const prevSubscribers = subscribers
+    if (prev === false) {
+      setSubscribers(prevSubscribers + 1)
+    }
+    else setSubscribers(prevSubscribers - 1)
     setSubscribed(!prev)
     setSubProcess(true)
     try {
       let res = await api.post(`/subscription/toggle/v/${video?.owner?._id}`)
-      toast.success(res.data?.data?.message)
+      toast.success(res.data?.message)
     } catch (error) {
       toast.error(error.response?.data?.message || "Something went wrong", { id: "subscription-error" })
       setSubscribed(prev)
@@ -69,7 +76,7 @@ const WatchPage = () => {
                   {video?.owner?.username || 'Channel name'}
                 </Link>
                 <p className="text-xs text-[#aaaaaa]">
-                  {video?.owner?.subscribers ?? 0} subscribers
+                  {subscribers} subscribers
                 </p>
               </div>
               {/* Subscribe button */}
