@@ -284,7 +284,7 @@ const userChannelDetails = asyncHandler(async (req, res) => {
         from: "subscriptions",
         localField: "_id",
         foreignField: "channel",
-        as: "subscribers",
+        as: "subscribersArr",
       },
     },
     {
@@ -298,7 +298,7 @@ const userChannelDetails = asyncHandler(async (req, res) => {
     {
       $addFields: {
         isSubscribed: {
-          $in: [req.user?._id, "$subscribers.subscriber"],
+          $in: [req.user?._id, "$subscribersArr.subscriber"],
         },
       },
     },
