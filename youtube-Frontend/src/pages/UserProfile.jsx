@@ -1,32 +1,54 @@
 import React, { useState } from 'react'
-import { useLoaderData, Link } from 'react-router-dom'
+import { useLoaderData, Link, useNavigate, useLocation } from 'react-router-dom'
 import { formatViews, timeAgo } from '../utils/DateViewFormat.js'
 import { Play } from 'lucide-react'
 import { api } from "../api/axios.js"
 import toast from "react-hot-toast"
+import { useAuthStore } from '../store/useAuthStore.js'
 
 const UserProfile = () => {
     let { user } = useLoaderData()
+    const navigate = useNavigate()
+    const location = useLocation()
     const [subscribed, setSubscribed] = useState(user?.isSubscribed)
-    const [subscribePro, setsubscribePro] = useState(false)
+    const [subscribers,setSubscribers] = useState(user?.subscribers || 0)
+    const [subscribePro, setSubscribePro] = useState(false)
     const [blocked, setBlocked] = useState(false)
+    const isAuthLoading = useAuthStore(s => s.isAuthLoading)
+    const isUser = useAuthStore(s => s.user)
 
     async function handleClick() {
+        if (isAuthLoading) return
+        if (isUser === null) {
+            navigate(`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`)
+            return
+        }
+
+        const prev = subscribed
+        const prevSubscribers = subscribers
+        if(prev === false){
+            setSubscribers(prevSubscribers + 1)
+        }
+        else setSubscribers(prevSubscribers - 1)
+        setSubscribePro(true)
+
         try {
-            setsubscribePro(true)
-            const response = await api.post(`/subscription/toggle/v/${user?._id}`)
-            setSubscribed(response.data?.data?.subscribe)
+            let res = await api.post(`/subscription/toggle/v/${user?._id}`)
+            setSubscribed(res.data?.data?.subscribe)
+            toast.success(res.data?.message)
         } catch (error) {
+            setSubscribed(prev) // show previous state of subscribe
+            setSubscribers(prevSubscribers)
             if (error.response?.status === 429) {
                 setBlocked(true)
                 toast.error("Too many attempts. Try again after 1 minutes.", { id: "too-many-subscribe-requests" })
                 setTimeout(() => setBlocked(false), 60 * 1000)
             } else {
-                toast.error(error.response?.data?.message || "Something went wrong!",{id : "subscribe-error"})
+                toast.error(error.response?.data?.message || "Something went wrong!", { id: "subscribe-error" })
             }
         }
         finally {
-            setsubscribePro(false)
+            setSubscribePro(false)
         }
     }
 
@@ -62,14 +84,17 @@ const UserProfile = () => {
                 <div className="text-center sm:text-left">
                     <h1 className="text-2xl md:text-4xl font-bold">{user?.fullName}</h1>
                     <p className="text-sm text-gray-500 mt-1">
-                        @{user?.username} • {user?.subscribers?.length || 0} subscribers
+                        @{user?.username} • {subscribers} subscribers
                     </p>
 
                     <button
                         type="button"
                         disabled={subscribePro || blocked}
                         onClick={handleClick}
-                        className={`subscribeBtn h-9.5 px-5 max-[661px]:mx-auto my-3 rounded-full text-sm font-medium transition-colors duration-150 cursor-pointer flex items-center justify-center select-none $ bg-white text-black hover:bg-[#ededed] disabled:bg-[#b8b8b8] disabled:cursor-not-allowed`}
+                        className={`ml-3 my-2.5 inline-flex cursor-pointer items-center justify-center gap-1.5 rounded-full px-6 py-2 text-sm font-medium transition-colors duration-150 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 ${subscribed
+                            ? "bg-[#272727] text-[#f1f1f1] hover:bg-[#3f3f3f]"
+                            : "bg-[#f1f1f1] text-[#0f0f0f] hover:bg-[#d9d9d9]"
+                            }`}
                     >
                         {subscribed ? "Subscribed" : "Subscribe"}
                     </button>
