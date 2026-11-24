@@ -2,13 +2,14 @@ import { Router } from "express";
 import { registerUser, login, logout, updateUserDetails, changePassword, updateAvatar, updateCoverImage, userChannelDetails, refreshAccessToken,deleteAccount, getCurrentUser, getWatchHistory } from "../controllers/user.controllers.js";
 import {upload} from "../middlewares/multer.middleware.js"
 import {verifyJWT} from "../middlewares/auth.middleware.js"
+import { optionalVerifyJWT } from "../middlewares/optionalAuth.middleware.js";
 
 const router = Router()
 
 router.route("/register-user").post(upload.fields([{name : "avatar",maxCount : 1},{name : "coverImage",maxCount : 1}]),registerUser)
 router.route("/login").post(login)
 router.route("/refresh-access-token").post(refreshAccessToken)
-router.route("/channel/:username").get(userChannelDetails)
+router.route("/channel/:username").get(optionalVerifyJWT,userChannelDetails)
 
 //secure routes
 
