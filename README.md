@@ -8,7 +8,7 @@ A YouTube-style video platform built with the MERN stack. The backend is a produ
 
 | Layer | Technologies |
 | --- | --- |
-| **Frontend** | React 19, Vite, Tailwind CSS 4, React Router 7, React Hook Form, Axios, React Hot Toast, Lucide Icons (Redux Toolkit installed, not wired up yet) |
+| **Frontend** | React 19, Vite, Tailwind CSS 4, React Router 7, React Hook Form, Axios, React Hot Toast, Lucide Icons (Zustand for auth state, wired up) |
 | **Backend** | Node.js (ES Modules), Express 5, REST APIs |
 | **Database** | MongoDB with Mongoose ODM (transactions + aggregation pipelines, `mongoose-aggregate-paginate-v2`) |
 | **Media Storage** | Cloudinary (videos, thumbnails, avatars, cover images), Multer for uploads |
@@ -59,7 +59,7 @@ A YouTube-style video platform built with the MERN stack. The backend is a produ
 ### In Progress (Frontend)
 
 - **History** page exists as a stub and is not added to the router yet
-- **Auth state:** there is no global user state yet, so protected routes (e.g. `/upload-video` has no login guard), the current user in the navbar and logout are still to do. The sidebar's Shorts and Subscriptions items are placeholders without a route. The Profile page is currently outside the main `Layout` (no navbar/sidebar).
+- **Auth state:** global user state exists via Zustand (`useAuthStore`), but protected routes (e.g. `/upload-video` has no login guard), the current user in the navbar and logout are still to do. The sidebar's Shorts and Subscriptions items are placeholders without a route. The Profile page is currently outside the main `Layout` (no navbar/sidebar).
 - **Watch page:** the player and video/channel information are implemented, but like, subscribe, share, save, comments, suggested videos, and view-count tracking are still pending.
 
 ## 📁 Project Structure
