@@ -2,10 +2,25 @@ import { Menu, Search, Mic, Plus, Bell } from 'lucide-react'
 import youtubeHome from "../../assets/youtube-logo-icon.jpg"
 import { useContext } from 'react'
 import { sideBarContext } from '../../context/SideBarContext.jsx'
-import { NavLink } from "react-router-dom"
+import {useAuthStore} from "../../store/useAuthStore.js"
+import { useNavigate,useLocation } from 'react-router-dom'
 
 const Navbar = () => {
   const { setIsOpen } = useContext(sideBarContext)
+  const navigate = useNavigate()
+  const location = useLocation()
+  const user = useAuthStore(s => s.user)
+  const isAuthLoading = useAuthStore(s => s.isAuthLoading)
+
+  function handleClick(e){
+    if(isAuthLoading) return
+    if(user === null){
+      navigate(`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`)
+      return
+    }
+    navigate("/upload-video")
+  }
+
   return (
     <div className='Navbar w-full flex items-center justify-between px-4 py-1  relative top-2'>
 
@@ -34,10 +49,10 @@ const Navbar = () => {
           <Mic size={24} />
         </button>
 
-        <NavLink to="/upload-video" className={`flex items-center bg-[#3F3F3F] hover:bg-[#4b4b4b] py-2 px-4 space-x-2 rounded-[20px] duration-150`}> {/*create button*/}
+        <button type='button' disabled={isAuthLoading} onClick={handleClick} className={`flex items-center space-x-2 py-2 px-4 rounded-[20px] duration-150 ${isAuthLoading ? 'bg-[#3F3F3F] cursor-not-allowed opacity-60 text-gray-400' : 'bg-[#3F3F3F] hover:bg-[#4b4b4b] active:bg-[#555] cursor-pointer text-white'}`}> {/*create button*/}
           <Plus size={25} />
           <span className='text-[16px] font-medium'>Create</span>
-        </NavLink>
+        </button>
 
         <button className='p-3 rounded-[50%]  hover:bg-[#3F3F3F] duration-150 cursor-pointer'> {/* notifications button*/}
           <Bell size={24} />
