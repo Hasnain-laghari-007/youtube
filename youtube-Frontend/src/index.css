@@ -90,6 +90,18 @@
     scrollbar-width: thin;
     scrollbar-color: #717171 #0f0f0f;
   }
+  input:-webkit-autofill,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 30px #111111 inset !important;
+    -webkit-text-fill-color: #ffffff !important;
+    background-color: #111111 !important;
+    border-radius: 4px;
+    caret-color: #ffffff !important;
+    transition: background-color 50000s ease-in-out !important;
+    transition: color 50000s ease-in-out !important;
+  }
 }
 
 @layer components {
@@ -102,7 +114,7 @@
   .inputRow input::placeholder {
     @apply text-[13px];
   }
-  .videoForm button{
-    @apply text-[clamp(.75rem,2vw,1.25rem)]
+  .videoForm button {
+    @apply text-[clamp(.75rem,2vw,1.25rem)];
   }
 }
