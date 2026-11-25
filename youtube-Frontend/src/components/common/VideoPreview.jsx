@@ -1,7 +1,6 @@
 import React from "react"
 
 const VideoPreview = ({ videoSrc, videoPreview, setVideoPreview }) => {
-  console.log(videoSrc)
   return (
     <div
       className={`fixed top-0 left-0 w-screen min-h-screen flex items-center justify-center bg-black/85 transition-opacity ${
