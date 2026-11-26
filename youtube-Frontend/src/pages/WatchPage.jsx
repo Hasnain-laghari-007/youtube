@@ -12,7 +12,6 @@ const WatchPage = () => {
   const [subsProcess, setSubProcess] = useState(false)
   const [subscribers, setSubscribers] = useState(video?.owner?.subscribers || 0)
 
-  console.log(video)
   let user = useAuthStore(s => s.user)
   let isAuthLoading = useAuthStore(s => s.isAuthLoading)
 
@@ -44,7 +43,7 @@ const WatchPage = () => {
 
   return (
     <div className="min-h-screen bg-[#0f0f0f] text-[#f1f1f1]">
-      <div className="mx-auto flex max-w-[1750px] flex-col gap-6 px-4 py-6 lg:flex-row lg:px-6">
+      <div className="mx-auto flex max-w-[1750px] flex-col gap-4 px-4 pb-6 pt-5 lg:flex-row lg:px-6">
         {/* ---------- Left: player + info + comments ---------- */}
         <div className="min-w-0 flex-1">
           {/* Player (16:9) */}
@@ -154,12 +153,12 @@ const WatchPage = () => {
         </div>
 
         {/* ---------- Right: suggested videos ---------- */}
-        <aside className="w-full shrink-0 lg:w-100.5">
-          <div className="space-y-2">
+        <aside className="w-full shrink-0 lg:w-97.5 lg:ml-1 mt-6 lg:-mt-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="flex cursor-pointer gap-2">
-                <div className="aspect-video w-42 shrink-0 rounded-lg bg-[#272727]" />
-                <div className="min-w-0">
+              <div key={i} className="flex flex-col lg:flex-row gap-2 cursor-pointer group">
+                <div className="flex-1 aspect-video rounded-lg bg-[#272727] " />
+                <div>
                   <p className="line-clamp-2 text-sm font-medium leading-5">
                     Suggested video title {i}
                   </p>
