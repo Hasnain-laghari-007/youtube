@@ -34,10 +34,10 @@ const router = createBrowserRouter([
                         loader: async () => {
                             try {
                                 const response = await api.get("/videos/videoPage")
-                                return {videos : response.data.data.docs}
+                                return { videos: response.data.data.docs }
                             } catch (error) {
-                                toast.error( error.response?.data?.message || "Something went wrong!")
-                                return {videos : []}
+                                toast.error(error.response?.data?.message || "Something went wrong!")
+                                return { videos: [] }
                             }
                         }
                     }
@@ -64,8 +64,21 @@ const router = createBrowserRouter([
             // Video Upload Page Route
             {
                 path: "/upload-video",
-                element: <VideoUpload />
-            },
+                element: <VideoUpload />,
+                loader: async () => {
+                    try {
+                        await api.get("/users/current-user")
+                        return null
+                    } catch (error) {
+                        if (error.response?.status === 401) {
+                            return redirect("/login")
+                        }
+                        toast.error(error.response?.data?.message || "Something went wrong!")
+                        return null
+                    }
+                }
+            }
+            ,
             // My Profile Profile Page Route
             {
                 path: "/profile",
@@ -87,29 +100,29 @@ const router = createBrowserRouter([
             },
             // User Profile Page Route
             {
-                path : "/user/:username",
-                element : <UserProfile/>,
-                loader : async({params})=>{
+                path: "/user/:username",
+                element: <UserProfile />,
+                loader: async ({ params }) => {
                     try {
                         const res = await api.get(`/users/channel/${params.username}`)
-                        return {user : res.data.data}
+                        return { user: res.data.data }
                     } catch (error) {
-                        toast.error( error.response?.data?.message || "Something went wrong!")
-                        return {user  : {} }
+                        toast.error(error.response?.data?.message || "Something went wrong!")
+                        return { user: {} }
                     }
                 }
             },
             // Watch Page Route
             {
-                path : "/watch/:id",
-                element : <WatchPage/>,
-                loader : async({params})=>{
+                path: "/watch/:id",
+                element: <WatchPage />,
+                loader: async ({ params }) => {
                     try {
                         let response = await api.get(`/videos/video/${params.id}`)
-                        return {video : response.data?.data}
+                        return { video: response.data?.data }
                     } catch (error) {
                         toast.error(error.response?.data?.message || "Something went wrong!")
-                        return {video : {}}
+                        return { video: {} }
                     }
                 }
             }
