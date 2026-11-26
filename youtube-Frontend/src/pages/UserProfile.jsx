@@ -120,7 +120,7 @@ const UserProfile = () => {
                                     <div className="descriptionDiv flex flex-col items-start flex-1">
                                         <p className="videoTitle text-[16px]/[22px] font-medium text-[#f1f1f1] line-clamp-2">
                                             {
-                                                video.description || ""
+                                                video.title || ""
                                             }
                                         </p>
                                         <p className="text-[13px] flex items-center truncate font-normal text-[#aaaaaa] cursor-pointer">
