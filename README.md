@@ -6,14 +6,14 @@ A YouTube-style video platform built with the MERN stack. The backend is a produ
 
 ## 🚀 Tech Stack
 
-| Layer | Technologies |
-| --- | --- |
-| **Frontend** | React 19, Vite, Tailwind CSS 4, React Router 7, React Hook Form, Axios, React Hot Toast, Lucide Icons (Zustand for auth state, wired up) |
-| **Backend** | Node.js (ES Modules), Express 5, REST APIs |
-| **Database** | MongoDB with Mongoose ODM (transactions + aggregation pipelines, `mongoose-aggregate-paginate-v2`) |
-| **Media Storage** | Cloudinary (videos, thumbnails, avatars, cover images), Multer for uploads |
-| **Caching** | Redis via `ioredis` |
-| **Security** | JWT (access + refresh tokens), bcrypt, Helmet, CORS, `express-rate-limit` |
+| Layer             | Technologies                                                                                                                             |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **Frontend**      | React 19, Vite, Tailwind CSS 4, React Router 7, React Hook Form, Axios, React Hot Toast, Lucide Icons (Zustand for auth state, wired up) |
+| **Backend**       | Node.js (ES Modules), Express 5, REST APIs                                                                                               |
+| **Database**      | MongoDB with Mongoose ODM (transactions + aggregation pipelines, `mongoose-aggregate-paginate-v2`)                                       |
+| **Media Storage** | Cloudinary (videos, thumbnails, avatars, cover images), Multer for uploads                                                               |
+| **Caching**       | Redis via `ioredis`                                                                                                                      |
+| **Security**      | JWT (access + refresh tokens), bcrypt, Helmet, CORS, `express-rate-limit`                                                                |
 
 ## ✨ Features
 
@@ -171,50 +171,50 @@ Other frontend scripts: `npm run build`, `npm run preview`, `npm run lint`.
 
 ## 📡 API Reference
 
-Base URL: `/api/v1`  |  🔒 = requires authentication (JWT via cookie or `Authorization: Bearer <token>`)
+Base URL: `/api/v1` | 🔒 = requires authentication (JWT via cookie or `Authorization: Bearer <token>`)
 
 ### Users — `/users`
 
-| Method | Endpoint | Description |
-| --- | --- | --- |
-| POST | `/register-user` | Register (multipart: `avatar` (required), `coverImage`, plus `username`, `email`, `password`, `fullName`) |
-| POST | `/login` | Login with `email` or `username` + `password` |
-| POST | `/refresh-access-token` | Get a new access token (uses the refresh token cookie or body) |
-| POST | `/logout` 🔒 | Logout |
-| GET | `/current-user` 🔒 | Get logged-in user |
-| PATCH | `/update-user-details` 🔒 | Update `fullName`, `username`, or `email` |
-| PATCH | `/change-password` 🔒 | Change password (`oldPassword`, `newPassword`) |
-| PATCH | `/avatar` 🔒 | Update avatar (multipart: `avatar`) |
-| PATCH | `/cover-image` 🔒 | Update cover image (multipart: `coverImage`) |
-| GET | `/channel/:username` | Channel details (subscribers, videos, `isSubscribed`) |
-| GET | `/watch-history` 🔒 | Watch history |
-| DELETE | `/delete-account` 🔒 | Delete account |
+| Method | Endpoint                  | Description                                                                                               |
+| ------ | ------------------------- | --------------------------------------------------------------------------------------------------------- |
+| POST   | `/register-user`          | Register (multipart: `avatar` (required), `coverImage`, plus `username`, `email`, `password`, `fullName`) |
+| POST   | `/login`                  | Login with `email` or `username` + `password`                                                             |
+| POST   | `/refresh-access-token`   | Get a new access token (uses the refresh token cookie or body)                                            |
+| POST   | `/logout` 🔒              | Logout                                                                                                    |
+| GET    | `/current-user` 🔒        | Get logged-in user                                                                                        |
+| PATCH  | `/update-user-details` 🔒 | Update `fullName`, `username`, or `email`                                                                 |
+| PATCH  | `/change-password` 🔒     | Change password (`oldPassword`, `newPassword`)                                                            |
+| PATCH  | `/avatar` 🔒              | Update avatar (multipart: `avatar`)                                                                       |
+| PATCH  | `/cover-image` 🔒         | Update cover image (multipart: `coverImage`)                                                              |
+| GET    | `/channel/:username`      | Channel details (subscribers, videos, `isSubscribed`)                                                     |
+| GET    | `/watch-history` 🔒       | Watch history                                                                                             |
+| DELETE | `/delete-account` 🔒      | Delete account                                                                                            |
 
 ### Videos — `/videos`
 
-| Method | Endpoint | Description |
-| --- | --- | --- |
-| GET | `/videoPage` | Paginated video feed (`page`, `limit`, `sortBy`, `sortType`) |
-| POST | `/upload-video` 🔒 | **Step 1:** upload the video file and create a draft (multipart: `Video`) |
-| PATCH | `/video/:id` 🔒 | **Step 2:** publish the draft (multipart: `Thumbnail`, plus `title`, `description`) |
-| GET | `/video/:id` 🔒 | Get a single video |
-| GET | `/get-current-user-videos` 🔒 | All videos of the logged-in user (with channel `avatar` and `username`) |
-| DELETE | `/delete/:id` 🔒 | Delete a video (also used to discard an unpublished draft) |
-| GET | `/top-videos/:id` 🔒 | A user's top 10 videos by views (Redis-cached, 2-minute TTL) |
+| Method | Endpoint                      | Description                                                                         |
+| ------ | ----------------------------- | ----------------------------------------------------------------------------------- |
+| GET    | `/videoPage`                  | Paginated video feed (`page`, `limit`, `sortBy`, `sortType`)                        |
+| POST   | `/upload-video` 🔒            | **Step 1:** upload the video file and create a draft (multipart: `Video`)           |
+| PATCH  | `/video/:id` 🔒               | **Step 2:** publish the draft (multipart: `Thumbnail`, plus `title`, `description`) |
+| GET    | `/video/:id` 🔒               | Get a single video                                                                  |
+| GET    | `/get-current-user-videos` 🔒 | All videos of the logged-in user (with channel `avatar` and `username`)             |
+| DELETE | `/delete/:id` 🔒              | Delete a video (also used to discard an unpublished draft)                          |
+| GET    | `/top-videos/:id` 🔒          | A user's top 10 videos by views (Redis-cached, 2-minute TTL)                        |
 
 > **Note:** The multipart field names for video uploads are case-sensitive: `Video` and `Thumbnail` (capital first letter).
 
 ### Likes — `/likes`
 
-| Method | Endpoint | Description |
-| --- | --- | --- |
-| POST | `/toggle/v/:videoId` 🔒 | Like / unlike a video |
+| Method | Endpoint                | Description           |
+| ------ | ----------------------- | --------------------- |
+| POST   | `/toggle/v/:videoId` 🔒 | Like / unlike a video |
 
 ### Subscriptions — `/subscription`
 
-| Method | Endpoint | Description |
-| --- | --- | --- |
-| POST | `/toggle/v/:id` 🔒 | Subscribe / unsubscribe to a channel (`:id` is the channel's user ID) |
+| Method | Endpoint           | Description                                                           |
+| ------ | ------------------ | --------------------------------------------------------------------- |
+| POST   | `/toggle/v/:id` 🔒 | Subscribe / unsubscribe to a channel (`:id` is the channel's user ID) |
 
 ### Response Format
 
@@ -252,7 +252,7 @@ All responses follow the same shape:
 
 ### 🐞 Known issues / backend hardening to-do
 
-- [ ] **Ownership check on video delete:** `DELETE /videos/delete/:id` currently deletes by id only; it should also match `owner: req.user._id`.
+- [x] **Ownership check on video delete:** `DELETE /videos/delete/:id` now matches `owner: req.user._id`, so users can only delete their own videos.
 - [ ] **`videosCount` drift:** deleting an unpublished draft still decrements `videosCount`, even though the count is only incremented when a video is published. Only decrement for published videos (e.g. when `title`/`thumbnail` exist).
 - [ ] **Thumbnail cleanup on delete:** the check `deleteVideo?.thumbnail` in `deleteVideo` should be `deletedVideo?.thumbnail`, otherwise the thumbnail stays on Cloudinary.
 - [ ] **Hide drafts from the public feed:** `GET /videos/videoPage` also returns unpublished drafts (no title/thumbnail). Filter on published videos only.
