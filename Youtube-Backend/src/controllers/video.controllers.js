@@ -136,7 +136,9 @@ const deleteVideo = asyncHandler(async (req, res) => {
   try {
     session.startTransaction();
 
-    const deletedVideo = await Video.findByIdAndDelete(id).session(session);
+    const deletedVideo = await Video.findOneAndDelete(
+      { _id: id, owner: req.user._id }
+    ).session(session);
     if (!deletedVideo) {
       throw new ApiError("Video not found", 404);
     }
@@ -149,7 +151,7 @@ const deleteVideo = asyncHandler(async (req, res) => {
     await session.commitTransaction();
 
     await deleteVideoOnCloudinary(deletedVideo.videoFile);
-    if(deleteVideo?.thumbnail) await deleteOnCloudinary(deletedVideo.thumbnail);
+    if (deletedVideo?.thumbnail) await deleteOnCloudinary(deletedVideo.thumbnail);
     return res
       .status(200)
       .json(new ApiResponse("Video delete successfully", {}, 204));
