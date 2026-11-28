@@ -339,10 +339,21 @@ const getCurrentUserVideos = asyncHandler(async(req,res)=>{
         }
       },
       {
+        $addFields : {
+          userInfo : { $first : "$userField" }
+        },
+      },
+      {
         $set : {
-          avatar : "$userField.avatar",
-          channel : "$userField.username"
-        }
+          avatar : "$userInfo.avatar",
+          channel : "$userInfo.username"
+        },
+      },
+      {
+        $project : {
+          userField : 0,
+          userInfo : 0
+        },
       },
       {
         $sort : {
